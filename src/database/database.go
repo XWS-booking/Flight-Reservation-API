@@ -11,7 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func InitDB() *mongo.Client {
+func InitDB() (*mongo.Client, error) {
 	connection_string := os.Getenv("DATABASE_CONNECTION_STRING")
 	Println(connection_string)
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
@@ -23,7 +23,8 @@ func InitDB() *mongo.Client {
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)
+		return nil, err
 	}
 
-	return client
+	return client, err
 }
