@@ -1,6 +1,7 @@
 package auth
 
 import (
+	. "flight_reservation_api/src/auth/middlewares"
 	"flight_reservation_api/src/shared"
 	. "flight_reservation_api/src/shared"
 	"net/http"
@@ -13,7 +14,7 @@ type AuthController struct {
 }
 
 func (authController *AuthController) constructor(router *mux.Router) {
-	router.HandleFunc("/register", authController.create).Methods("POST")
+	router.HandleFunc("/register", ExampleMiddleware(authController.create)).Methods("POST")
 	router.HandleFunc("/user/{id}", authController.findById).Methods("GET")
 }
 

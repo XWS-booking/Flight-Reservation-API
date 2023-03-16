@@ -28,3 +28,7 @@ func DecodeBody(req *http.Request, v interface{}) error {
 	}
 	return nil
 }
+
+func GetHeader(req *http.Request, key string) []string {
+	return req.Header[key]
+}
