@@ -11,8 +11,14 @@ const (
 )
 
 type User struct {
-	Id      primitive.ObjectID `bson:"_id,omitempty"`
-	Name    string
-	Surname string
-	Role    UserRole
+	Id       primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name     string             `bson:"name" json:"name"`
+	Surname  string             `bson:"surname" json:"surname"`
+	Email    string             `bson:"email" json:"email"`
+	Password string             `bson:"password" json:"password"`
+	Role     UserRole           `bson:"role" json:"role"`
+}
+
+func (user *User) ValidatePassword(password string) bool {
+	return user.Password == password
 }

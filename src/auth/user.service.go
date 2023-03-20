@@ -13,3 +13,12 @@ func (userService *UserService) create(user User) primitive.ObjectID {
 func (userService *UserService) findById(id primitive.ObjectID) User {
 	return userService.UserRepository.findById(id)
 }
+
+func (userService *UserService) getOneByEmail(email string) User {
+	return userService.UserRepository.getOneByEmail(email)
+}
+
+func (userService *UserService) validateUser(email string, password string) bool {
+	usr := userService.getOneByEmail(email)
+	return usr.ValidatePassword(password)
+}

@@ -5,9 +5,9 @@ import (
 	"net/http"
 )
 
-func ExampleMiddleware(f http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.URL.Path)
-		f(w, r)
-	}
+func ExampleMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, h *http.Request) {
+		log.Println(h.URL.Path)
+		next.ServeHTTP(rw, h)
+	})
 }
