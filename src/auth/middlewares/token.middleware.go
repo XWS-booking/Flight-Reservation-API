@@ -2,32 +2,40 @@ package middlewares
 
 import (
 	"flight_reservation_api/src/shared"
+	"fmt"
 	"net/http"
+	"strings"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/gorilla/context"
 )
 
 func TokenValidationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		// check if token is present
-		if _, ok := r.Header["Token"]; !ok {
-			rw.WriteHeader(http.StatusUnauthorized)
-			rw.Write([]byte("Token Missing"))
+		if r.Header["Authorization"] == nil {
+			shared.Unauthorized(rw)
 			return
 		}
-		token := r.Header["Token"][0]
-		check, err := shared.ValidateToken(token, "Secure_Random_String")
+		bearer := strings.Split(r.Header["Authorization"][0], " ")
+		token, err := jwt.Parse(bearer[1], func(token *jwt.Token) (interface{}, error) {
+			nesto, ok := token.Method.(*jwt.SigningMethodHMAC)
+			fmt.Println(nesto)
+			fmt.Println(ok)
+			if !ok {
+				return "", fmt.Errorf("ok")
+			}
+			fmt.Println("bruh")
+			fmt.Println(token)
+			return token, nil
 
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			rw.Write([]byte("Token Validation Failed"))
+		})
+		fmt.Println(err)
+		if token == nil {
+			shared.Unauthorized(rw)
 			return
 		}
-		if !check {
-			rw.WriteHeader(http.StatusUnauthorized)
-			rw.Write([]byte("Token Invalid"))
-			return
-		}
-		rw.WriteHeader(http.StatusOK)
-		rw.Write([]byte("Authorized Token"))
-
+		context.Set(r, "Token", token)
+		next.ServeHTTP(rw, r)
 	})
 }

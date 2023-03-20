@@ -23,9 +23,11 @@ type AuthController struct {
 func (authController *AuthController) constructor(router *mux.Router) {
 	authRouter := router.PathPrefix("/auth").Subrouter()
 	authRouter.Use(middlewares.ExampleMiddleware)
-	// authRouter.Use(middlewares.TokenValidationMiddleware)
 	authRouter.HandleFunc("/signin", authController.Signin).Methods("POST")
-	authRouter.HandleFunc("/register", authController.Register).Methods("POST")
+	adminRouter := authRouter.PathPrefix("/admin").Subrouter()
+	adminRouter.Use(middlewares.TokenValidationMiddleware)
+	adminRouter.Use(middlewares.RolesMiddleware([]UserRole{UserRole(REGULAR)}))
+	adminRouter.HandleFunc("/register", authController.Register).Methods("POST")
 	authRouter.Use(middlewares.ErrorHandlerMiddleware)
 }
 
