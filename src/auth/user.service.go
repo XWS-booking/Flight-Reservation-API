@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"fmt"
+	. "flight_reservation_api/src/shared"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -18,13 +18,10 @@ func (userService *UserService) findById(id primitive.ObjectID) User {
 	return userService.UserRepository.findById(id)
 }
 
-func (userService *UserService) getOneByEmail(email string) User {
-	return userService.UserRepository.getOneByEmail(email)
-}
-
-func (userService *UserService) validateUser(email string, password string) bool {
-	usr := userService.getOneByEmail(email)
-	fmt.Println(password)
-	fmt.Println(usr.Password)
-	return usr.ValidatePassword(password)
+func (userService *UserService) getOneByEmail(email string) (User, *Error) {
+	user, err := userService.UserRepository.findByEmail(email)
+	if err != nil {
+		return user, UserDoesntExist()
+	}
+	return user, nil
 }

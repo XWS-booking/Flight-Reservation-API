@@ -1,6 +1,7 @@
 package auth
 
 import (
+	. "flight_reservation_api/src/auth/dtos"
 	"flight_reservation_api/src/auth/middlewares"
 	"flight_reservation_api/src/shared"
 	. "flight_reservation_api/src/shared"
@@ -11,18 +12,25 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func CreateAuthController(router *mux.Router, userService *UserService, authService *AuthService) *AuthController {
+	controller := &AuthController{UserService: userService, AuthService: authService}
+	controller.constructor(router)
+	return controller
+}
+
 type AuthController struct {
 	UserService *UserService
+	AuthService *AuthService
 }
 
 func (authController *AuthController) constructor(router *mux.Router) {
-	authRouter := router.PathPrefix("").Subrouter()
+	authRouter := router.PathPrefix("/auth").Subrouter()
 	authRouter.Use(middlewares.ExampleMiddleware)
-	authRouter.Use(middlewares.TokenValidationMiddleware)
-	router.HandleFunc("/signup", authController.Signin).Methods("POST")
-	router.HandleFunc("/register", authController.create).Methods("POST")
+	// authRouter.Use(middlewares.TokenValidationMiddleware)
+	authRouter.HandleFunc("/signin", authController.Signin).Methods("POST")
+	authRouter.HandleFunc("/register", authController.create).Methods("POST")
 	authRouter.HandleFunc("/user/{id}", authController.findById).Methods("GET")
-
+	authRouter.Use(middlewares.ErrorHandlerMiddleware)
 }
 
 func (authController *AuthController) create(resp http.ResponseWriter, req *http.Request) {
@@ -60,31 +68,21 @@ func (authController *AuthController) getSignedToken() (string, error) {
 	return tokenString, nil
 }
 
-func (authController *AuthController) Signin(rw http.ResponseWriter, r *http.Request) {
-	if _, ok := r.Header["Email"]; !ok {
-		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("Email Missing"))
-		return
-	}
-	if _, ok := r.Header["Password"]; !ok {
-		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("Password Missing"))
-		return
-	}
-	valid := authController.UserService.validateUser(r.Header["Email"][0], r.Header["Password"][0])
-	if !valid {
-		rw.WriteHeader(http.StatusUnauthorized)
-		rw.Write([]byte("Incorrect Password"))
-		return
-	}
-	tokenString, err := authController.getSignedToken()
+func (authController *AuthController) Signin(resp http.ResponseWriter, req *http.Request) {
+	var user User
+	err := DecodeBody(req, &user)
 	if err != nil {
-		fmt.Println(err)
-		rw.WriteHeader(http.StatusInternalServerError)
-		rw.Write([]byte("Internal Server Error"))
+		BadRequest(resp, "Something wrong with the data")
+	}
+
+	token, e := authController.AuthService.SignIn(user.Email, user.Password)
+	if e != nil {
+		BadRequest(resp, e.Message)
 		return
 	}
 
-	rw.WriteHeader(http.StatusOK)
-	rw.Write([]byte(tokenString))
+	tokenDto := JwtDto{Token: token}
+	Ok(resp, tokenDto)
+	return
+
 }

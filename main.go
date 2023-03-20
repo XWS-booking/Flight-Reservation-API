@@ -22,12 +22,11 @@ func main() {
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
-
-	userControllerFactory := UserControllerFactory{}
 	logger := log.New(os.Stdout, "[Users-api] ", log.LstdFlags)
 	userRepository := &UserRepository{DB: db, Logger: logger}
 	userService := &UserService{UserRepository: userRepository}
-	userControllerFactory.Create(router, userService)
+	authService := &AuthService{UserRepository: userRepository}
+	CreateAuthController(router, userService, authService)
 
 	startServer(router)
 }

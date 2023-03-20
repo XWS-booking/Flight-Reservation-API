@@ -35,15 +35,16 @@ func (userRepository *UserRepository) findById(id primitive.ObjectID) User {
 	return user
 }
 
-func (userRepository *UserRepository) getOneByEmail(email string) User {
+func (userRepository *UserRepository) findByEmail(email string) (User, error) {
 	collection := userRepository.getCollection("users")
 	var user User
 	filter := bson.M{"email": email}
 	err := collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		userRepository.Logger.Println(err)
+		return user, err
 	}
-	return user
+	return user, nil
 }
 
 func (userRepository *UserRepository) getCollection(key string) *mongo.Collection {

@@ -1,6 +1,10 @@
 package auth
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	. "flight_reservation_api/src/shared"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type UserRole int64
 
@@ -19,6 +23,9 @@ type User struct {
 	Role     UserRole           `bson:"role" json:"role"`
 }
 
-func (user *User) ValidatePassword(password string) bool {
-	return user.Password == password
+func (user *User) ValidatePassword(password string) *Error {
+	if user.Password != password {
+		return InvalidCredentials()
+	}
+	return nil
 }
