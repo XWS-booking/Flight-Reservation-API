@@ -16,10 +16,12 @@ type AuthController struct {
 }
 
 func (authController *AuthController) constructor(router *mux.Router) {
-	adminRouter := router.PathPrefix("").Subrouter()
-	adminRouter.Use(middlewares.ExampleMiddleware)
+	authRouter := router.PathPrefix("").Subrouter()
+	authRouter.Use(middlewares.ExampleMiddleware)
+	authRouter.Use(middlewares.TokenValidationMiddleware)
+	router.HandleFunc("/signup", authController.Signin).Methods("POST")
 	router.HandleFunc("/register", authController.create).Methods("POST")
-	adminRouter.HandleFunc("/user/{id}", authController.findById).Methods("GET")
+	authRouter.HandleFunc("/user/{id}", authController.findById).Methods("GET")
 
 }
 
@@ -56,4 +58,33 @@ func (authController *AuthController) getSignedToken() (string, error) {
 		return tokenString, err
 	}
 	return tokenString, nil
+}
+
+func (authController *AuthController) Signin(rw http.ResponseWriter, r *http.Request) {
+	if _, ok := r.Header["Email"]; !ok {
+		rw.WriteHeader(http.StatusBadRequest)
+		rw.Write([]byte("Email Missing"))
+		return
+	}
+	if _, ok := r.Header["Password"]; !ok {
+		rw.WriteHeader(http.StatusBadRequest)
+		rw.Write([]byte("Password Missing"))
+		return
+	}
+	valid := authController.UserService.validateUser(r.Header["Email"][0], r.Header["Password"][0])
+	if !valid {
+		rw.WriteHeader(http.StatusUnauthorized)
+		rw.Write([]byte("Incorrect Password"))
+		return
+	}
+	tokenString, err := authController.getSignedToken()
+	if err != nil {
+		fmt.Println(err)
+		rw.WriteHeader(http.StatusInternalServerError)
+		rw.Write([]byte("Internal Server Error"))
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+	rw.Write([]byte(tokenString))
 }
