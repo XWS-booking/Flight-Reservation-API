@@ -4,6 +4,7 @@ import (
 	"flight_reservation_api/src/shared"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -12,29 +13,24 @@ import (
 
 func TokenValidationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		// check if token is present
 		if r.Header["Authorization"] == nil {
 			shared.Unauthorized(rw)
 			return
 		}
 		bearer := strings.Split(r.Header["Authorization"][0], " ")
 		token, err := jwt.Parse(bearer[1], func(token *jwt.Token) (interface{}, error) {
-			nesto, ok := token.Method.(*jwt.SigningMethodHMAC)
-			fmt.Println(nesto)
-			fmt.Println(ok)
-			if !ok {
-				return "", fmt.Errorf("ok")
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
-			fmt.Println("bruh")
-			fmt.Println(token)
-			return token, nil
-
+			var secretKey = []byte(os.Getenv("JWT_SECRET"))
+			return secretKey, nil
 		})
 		fmt.Println(err)
-		if token == nil {
+		if err != nil {
 			shared.Unauthorized(rw)
 			return
 		}
+
 		context.Set(r, "Token", token)
 		next.ServeHTTP(rw, r)
 	})

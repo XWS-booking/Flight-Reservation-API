@@ -3,7 +3,6 @@ package middlewares
 import (
 	"flight_reservation_api/src/auth/model"
 	. "flight_reservation_api/src/shared"
-	"fmt"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -15,10 +14,14 @@ func RolesMiddleware(roles []model.UserRole) func(h http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			var token *jwt.Token = context.Get(r, "Token").(*jwt.Token)
 			claims, ok := token.Claims.(jwt.MapClaims)
-			fmt.Println(ok)
-			if ok && token.Valid {
-				role := claims["role"].(string)
-				fmt.Println(role)
+			if !ok || !token.Valid {
+				Unauthorized(w)
+				return
+			}
+			role := claims["role"].(float64)
+			if !containsRole(roles, int(role)) {
+				Forbidden(w)
+				return
 			}
 			h.ServeHTTP(w, r)
 		}
@@ -26,18 +29,12 @@ func RolesMiddleware(roles []model.UserRole) func(h http.Handler) http.Handler {
 		return http.HandlerFunc(fn)
 	}
 }
-func DecodeToken(token string) (*model.UserRole, *Error) {
-	claims := jwt.MapClaims{}
-	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte("<YOUR VERIFICATION KEY>"), nil
-	})
-	// ... error handling
-	if err != nil {
-		return nil, TokenValidationFailed()
+
+func containsRole(roles []model.UserRole, role int) bool {
+	for _, r := range roles {
+		if int(r) == role {
+			return true
+		}
 	}
-	// do something with decoded claims
-	for key, val := range claims {
-		fmt.Printf("Key: %v, value: %v\n", key, val)
-	}
-	return nil, nil
+	return false
 }

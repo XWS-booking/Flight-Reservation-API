@@ -2,7 +2,6 @@ package auth
 
 import (
 	"flight_reservation_api/src/auth/dtos"
-	"flight_reservation_api/src/auth/middlewares"
 	. "flight_reservation_api/src/auth/model"
 	. "flight_reservation_api/src/shared"
 	"net/http"
@@ -22,13 +21,8 @@ type AuthController struct {
 
 func (authController *AuthController) constructor(router *mux.Router) {
 	authRouter := router.PathPrefix("/auth").Subrouter()
-	authRouter.Use(middlewares.ExampleMiddleware)
 	authRouter.HandleFunc("/signin", authController.Signin).Methods("POST")
-	adminRouter := authRouter.PathPrefix("/admin").Subrouter()
-	adminRouter.Use(middlewares.TokenValidationMiddleware)
-	adminRouter.Use(middlewares.RolesMiddleware([]UserRole{UserRole(REGULAR)}))
-	adminRouter.HandleFunc("/register", authController.Register).Methods("POST")
-	authRouter.Use(middlewares.ErrorHandlerMiddleware)
+	authRouter.HandleFunc("/register", authController.Register).Methods("POST")
 }
 
 func (authController *AuthController) Signin(resp http.ResponseWriter, req *http.Request) {
