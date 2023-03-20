@@ -15,3 +15,7 @@ func TokenGenerationFailed() *Error {
 func UserDoesntExist() *Error {
 	return &Error{Message: "User doesn't exist!"}
 }
+
+func RegistrationFailed() *Error {
+	return &Error{Message: "Registration data invalid or user with given email already exists!"}
+}

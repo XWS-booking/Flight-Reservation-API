@@ -24,9 +24,8 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	logger := log.New(os.Stdout, "[Users-api] ", log.LstdFlags)
 	userRepository := &UserRepository{DB: db, Logger: logger}
-	userService := &UserService{UserRepository: userRepository}
 	authService := &AuthService{UserRepository: userRepository}
-	CreateAuthController(router, userService, authService)
+	CreateAuthController(router, authService)
 
 	startServer(router)
 }
