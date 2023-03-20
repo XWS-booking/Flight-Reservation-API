@@ -2,7 +2,7 @@ package main
 
 import (
 	. "flight_reservation_api/src/auth"
-	"flight_reservation_api/src/database"
+	. "flight_reservation_api/src/database"
 	"log"
 	"net/http"
 	"os"
@@ -12,7 +12,10 @@ import (
 
 func main() {
 	LoadEnvs()
-	database, err := database.InitDB()
+	db, err := InitDB()
+	DeclareUnique(db, []UniqueField{
+		{Collection: "users", Fields: []string{"email"}},
+	})
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -21,9 +24,9 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	userControllerFactory := UserControllerFactory{}
-
 	logger := log.New(os.Stdout, "[Users-api] ", log.LstdFlags)
 	userRepository := &UserRepository{DB: database, Logger: logger}
+
 	userService := &UserService{UserRepository: userRepository}
 	userControllerFactory.Create(router, userService)
 
