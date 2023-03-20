@@ -17,11 +17,8 @@ type User struct {
 	Email    string             `bson:"email" json:"email"`
 	Password string             `bson:"password" json:"password"`
 	Role     UserRole           `bson:"role" json:"role"`
-<<<<<<< HEAD
 }
 
 func (user *User) ValidatePassword(password string) bool {
 	return user.Password == password
-=======
->>>>>>> Added unique index generator
 }

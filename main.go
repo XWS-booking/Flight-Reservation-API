@@ -25,8 +25,7 @@ func main() {
 
 	userControllerFactory := UserControllerFactory{}
 	logger := log.New(os.Stdout, "[Users-api] ", log.LstdFlags)
-	userRepository := &UserRepository{DB: database, Logger: logger}
-
+	userRepository := &UserRepository{DB: db, Logger: logger}
 	userService := &UserService{UserRepository: userRepository}
 	userControllerFactory.Create(router, userService)
 
