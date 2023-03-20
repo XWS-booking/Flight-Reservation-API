@@ -5,6 +5,7 @@ import (
 	"flight_reservation_api/src/database"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 )
@@ -20,7 +21,9 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	userControllerFactory := UserControllerFactory{}
-	userRepository := &UserRepository{DB: database}
+
+	logger := log.New(os.Stdout, "[Users-api] ", log.LstdFlags)
+	userRepository := &UserRepository{DB: database, Logger: logger}
 	userService := &UserService{UserRepository: userRepository}
 	userControllerFactory.Create(router, userService)
 
