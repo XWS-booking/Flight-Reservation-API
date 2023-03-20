@@ -27,6 +27,18 @@ func NotFound(resp http.ResponseWriter, message string) {
 	json.NewEncoder(resp).Encode(payload)
 }
 
+func Unauthorized(resp http.ResponseWriter) {
+	resp.WriteHeader(http.StatusUnauthorized)
+	payload := ErrorResponse{Status: http.StatusUnauthorized, Message: "Unauthorized"}
+	json.NewEncoder(resp).Encode(payload)
+}
+
+func Forbidden(resp http.ResponseWriter) {
+	resp.WriteHeader(http.StatusForbidden)
+	payload := ErrorResponse{Status: http.StatusForbidden, Message: "Forbidden"}
+	json.NewEncoder(resp).Encode(payload)
+}
+
 func JsonResponse(resp http.ResponseWriter, statusCode int, payload interface{}) {
 	resp.WriteHeader(statusCode)
 	json.NewEncoder(resp).Encode(payload)

@@ -58,11 +58,10 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 func generateToken(user User) (string, *Error) {
-	var secretKey = []byte(os.Getenv("secret"))
+	var secretKey = []byte(os.Getenv("JWT_SECRET"))
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(10 * time.Minute)
-	claims["authorized"] = true
+	claims["exp"] = time.Now().Add(90 * time.Minute).Unix()
 	claims["role"] = user.Role
 	claims["id"] = user.Id
 	tokenString, err := token.SignedString(secretKey)

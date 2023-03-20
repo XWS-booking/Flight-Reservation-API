@@ -12,6 +12,10 @@ func TokenGenerationFailed() *Error {
 	return &Error{Message: "Token generation failed!"}
 }
 
+func TokenValidationFailed() *Error {
+	return &Error{Message: "Token validation failed!"}
+}
+
 func UserDoesntExist() *Error {
 	return &Error{Message: "User doesn't exist!"}
 }
