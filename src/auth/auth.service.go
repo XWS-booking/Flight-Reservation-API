@@ -1,16 +1,38 @@
 package auth
 
 import (
+	. "flight_reservation_api/src/auth/model"
 	. "flight_reservation_api/src/shared"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {
 	UserRepository *UserRepository
+}
+
+func (authService *AuthService) Register(user User) (User, *Error) {
+	hashedPassword, err := HashPassword(user.Password)
+	if err != nil {
+		return User{}, RegistrationFailed()
+	}
+	user.Password = hashedPassword
+
+	id, err := authService.UserRepository.create(user)
+	if err != nil {
+		return User{}, RegistrationFailed()
+	}
+
+	created, err := authService.UserRepository.findById(id)
+	if err != nil {
+		return User{}, UserDoesntExist()
+	}
+
+	return created, nil
 }
 
 func (authService *AuthService) SignIn(email string, password string) (string, *Error) {
@@ -18,18 +40,21 @@ func (authService *AuthService) SignIn(email string, password string) (string, *
 	if err != nil {
 		return "", InvalidCredentials()
 	}
-	hashedPassword := hashPassword(password)
-
-	e := user.ValidatePassword(hashedPassword)
-	if e != nil {
-		return "", e
+	isPasswordValid := CheckPasswordHash(password, user.Password)
+	if !isPasswordValid {
+		return "", InvalidCredentials()
 	}
-
 	return generateToken(user)
 }
 
-func hashPassword(password string) string {
-	return password
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 func generateToken(user User) (string, *Error) {

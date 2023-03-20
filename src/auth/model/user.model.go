@@ -1,8 +1,6 @@
-package auth
+package model
 
 import (
-	. "flight_reservation_api/src/shared"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -21,11 +19,4 @@ type User struct {
 	Email    string             `bson:"email" json:"email"`
 	Password string             `bson:"password" json:"password"`
 	Role     UserRole           `bson:"role" json:"role"`
-}
-
-func (user *User) ValidatePassword(password string) *Error {
-	if user.Password != password {
-		return InvalidCredentials()
-	}
-	return nil
 }

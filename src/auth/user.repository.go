@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	. "flight_reservation_api/src/auth/model"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,24 +17,26 @@ type UserRepository struct {
 	Logger *log.Logger
 }
 
-func (userRepository *UserRepository) create(user User) primitive.ObjectID {
+func (userRepository *UserRepository) create(user User) (primitive.ObjectID, error) {
 	collection := userRepository.getCollection("users")
 	res, err := collection.InsertOne(context.TODO(), user)
 	if err != nil {
 		userRepository.Logger.Println(err)
+		return primitive.ObjectID{}, err
 	}
-	return res.InsertedID.(primitive.ObjectID)
+	return res.InsertedID.(primitive.ObjectID), nil
 }
 
-func (userRepository *UserRepository) findById(id primitive.ObjectID) User {
+func (userRepository *UserRepository) findById(id primitive.ObjectID) (User, error) {
 	collection := userRepository.getCollection("users")
 	var user User
 	filter := bson.M{"_id": id}
 	err := collection.FindOne(context.TODO(), filter).Decode(&user)
 	if err != nil {
 		userRepository.Logger.Println(err)
+		return User{}, err
 	}
-	return user
+	return user, nil
 }
 
 func (userRepository *UserRepository) findByEmail(email string) (User, error) {
