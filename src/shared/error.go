@@ -23,3 +23,7 @@ func UserDoesntExist() *Error {
 func RegistrationFailed() *Error {
 	return &Error{Message: "Registration data invalid or user with given email already exists!"}
 }
+
+func FlightNotCreated() *Error {
+	return &Error{Message: "Flight creation went wrong!"}
+}

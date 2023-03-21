@@ -3,6 +3,7 @@ package main
 import (
 	. "flight_reservation_api/src/auth"
 	. "flight_reservation_api/src/database"
+	. "flight_reservation_api/src/flights"
 	"log"
 	"net/http"
 	"os"
@@ -26,6 +27,10 @@ func main() {
 	userRepository := &UserRepository{DB: db, Logger: logger}
 	authService := &AuthService{UserRepository: userRepository}
 	CreateAuthController(router, authService)
+
+	flightRepository := &FlightRepository{DB: db, Logger: logger}
+	flightService := &FlightService{FlightRepository: flightRepository}
+	CreateFlightController(router, flightService)
 
 	startServer(router)
 }
