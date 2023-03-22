@@ -1,6 +1,7 @@
 package flights
 
 import (
+	"flight_reservation_api/src/flights/dtos"
 	. "flight_reservation_api/src/flights/model"
 	. "flight_reservation_api/src/shared"
 	"fmt"
@@ -24,7 +25,7 @@ type FlightController struct {
 func (flightController *FlightController) constructor(router *mux.Router) {
 	authRouter := router.PathPrefix("/flights").Subrouter()
 	authRouter.HandleFunc("/add", flightController.Create).Methods("POST")
-	authRouter.HandleFunc("/getAll/{startLocation}/{endLocation}/{seats}/{date}", flightController.GetAll).Methods("GET")
+	authRouter.HandleFunc("/getAll/{pageNumber}/{pageSize}/{startLocation}/{endLocation}/{seats}/{date}", flightController.GetAll).Methods("GET")
 }
 
 func (flightController *FlightController) Create(resp http.ResponseWriter, req *http.Request) {
@@ -46,9 +47,11 @@ func (flightController *FlightController) Create(resp http.ResponseWriter, req *
 }
 
 func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *http.Request) {
+	pageNumber, _ := strconv.Atoi(GetPathParam(req, "pageNumber"))
+	pageSize, _ := strconv.Atoi(GetPathParam(req, "pageSize"))
 	startLocation := GetPathParam(req, "startLocation")
 	endLocation := GetPathParam(req, "endLocation")
-	seatsParam := GetPathParam(req, "seats")
+	seats, _ := strconv.Atoi(GetPathParam(req, "seats"))
 	dateParam := GetPathParam(req, "date")
 	if startLocation == "null" {
 		startLocation = ""
@@ -56,23 +59,17 @@ func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *
 	if endLocation == "null" {
 		endLocation = ""
 	}
-	seats, err := strconv.Atoi(seatsParam)
-	if err != nil {
-		BadRequest(resp, "Cannot parse integer")
-		return
-	}
 
-	layout := "2006-01-02T15:04:05.000Z"
-	date, err := time.Parse(layout, dateParam)
+	date, err := time.Parse("2006-01-02T15:04:05.000Z", dateParam)
 	if err != nil {
 		date = time.Time{}
 	}
 
-	flights, e := flightController.FlightService.GetAll(date, startLocation, endLocation, seats)
+	flights, totalCount, e := flightController.FlightService.GetAll(pageNumber, pageSize, date, startLocation, endLocation, seats)
 	if e != nil {
 		BadRequest(resp, e.Message)
 		return
 	}
 
-	Ok(resp, flights)
+	Ok(resp, dtos.NewFlightPageDto(flights, totalCount))
 }

@@ -12,5 +12,6 @@ type IFlightRepository interface {
 	findById(id primitive.ObjectID) Flight
 	findAll() []Flight
 	delete(id primitive.ObjectID) error
-	getAll(date time.Time, startLocation string, endLocation string, seats int) []Flight
+	getAll(pageNumber int, pageSize int, date time.Time, startLocation string, endLocation string, seats int) []Flight
+	GetTotalCount(flightRepository *FlightRepository) (int, error)
 }

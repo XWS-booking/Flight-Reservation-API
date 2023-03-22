@@ -31,3 +31,7 @@ func FlightNotCreated() *Error {
 func FlightsReadFailed() *Error {
 	return &Error{Message: "Cannot read flights!"}
 }
+
+func FlightsCountFailed() *Error {
+	return &Error{Message: "Cannot count flights!"}
+}
