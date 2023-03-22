@@ -21,13 +21,9 @@ func (flightService *FlightService) Create(flight Flight) (primitive.ObjectID, *
 }
 
 func (flightService *FlightService) GetAll(pageNumber int, pageSize int, date time.Time, startLocation string, endLocation string, seats int) ([]Flight, int, *shared.Error) {
-	flights, err := flightService.FlightRepository.GetAll(pageNumber, pageSize, date, startLocation, endLocation, seats)
-	totalCount, err2 := flightService.FlightRepository.GetTotalCount()
+	flights, totalCount, err := flightService.FlightRepository.GetAll(pageNumber, pageSize, date, startLocation, endLocation, seats)
 	if err != nil {
 		return flights, totalCount, shared.FlightsReadFailed()
-	}
-	if err2 != nil {
-		return flights, totalCount, shared.FlightsCountFailed()
 	}
 	return flights, totalCount, nil
 }

@@ -28,7 +28,7 @@ func (flightRepository *FlightRepository) Create(flight Flight) (primitive.Objec
 	return res.InsertedID.(primitive.ObjectID), nil
 }
 
-func (flightRepository *FlightRepository) GetAll(pageNumber int, pageSize int, date time.Time, startLocation string, endLocation string, seats int) ([]Flight, error) {
+func (flightRepository *FlightRepository) GetAll(pageNumber int, pageSize int, date time.Time, startLocation string, endLocation string, seats int) ([]Flight, int, error) {
 	collection := flightRepository.getCollection("flights")
 	var flights []Flight
 	filter := bson.D{}
@@ -47,8 +47,9 @@ func (flightRepository *FlightRepository) GetAll(pageNumber int, pageSize int, d
 	options.SetLimit(int64(pageSize))
 
 	cur, err := collection.Find(context.TODO(), filter, options)
+	totalCount, _ := flightRepository.GetTotalCount(filter)
 	if err != nil {
-		return flights, err
+		return flights, totalCount, err
 	}
 
 	for cur.Next(context.TODO()) {
@@ -59,12 +60,12 @@ func (flightRepository *FlightRepository) GetAll(pageNumber int, pageSize int, d
 		}
 		flights = append(flights, elem)
 	}
-	return flights, nil
+	return flights, totalCount, nil
 }
 
-func (flightRepository *FlightRepository) GetTotalCount() (int, error) {
+func (flightRepository *FlightRepository) GetTotalCount(filter bson.D) (int, error) {
 	collection := flightRepository.getCollection("flights")
-	count, err := collection.CountDocuments(context.TODO(), bson.M{})
+	count, err := collection.CountDocuments(context.TODO(), filter)
 	if err != nil {
 		return int(count), err
 	}
