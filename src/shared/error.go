@@ -27,3 +27,7 @@ func RegistrationFailed() *Error {
 func FlightNotCreated() *Error {
 	return &Error{Message: "Flight creation went wrong!"}
 }
+
+func FlightsReadFailed() *Error {
+	return &Error{Message: "Cannot read flights!"}
+}

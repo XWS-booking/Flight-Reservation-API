@@ -5,6 +5,8 @@ import (
 	. "flight_reservation_api/src/shared"
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -22,6 +24,7 @@ type FlightController struct {
 func (flightController *FlightController) constructor(router *mux.Router) {
 	authRouter := router.PathPrefix("/flights").Subrouter()
 	authRouter.HandleFunc("/add", flightController.Create).Methods("POST")
+	authRouter.HandleFunc("/getAll/{startLocation}/{endLocation}/{seats}/{date}", flightController.GetAll).Methods("GET")
 }
 
 func (flightController *FlightController) Create(resp http.ResponseWriter, req *http.Request) {
@@ -40,4 +43,32 @@ func (flightController *FlightController) Create(resp http.ResponseWriter, req *
 	}
 
 	Ok(resp, id)
+}
+
+func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *http.Request) {
+	startLocation := GetPathParam(req, "startLocation")
+	endLocation := GetPathParam(req, "endLocation")
+	seatsParam := GetPathParam(req, "seats")
+	dateParam := GetPathParam(req, "date")
+
+	seats, err := strconv.Atoi(seatsParam)
+	if err != nil {
+		BadRequest(resp, "Cannot parse integer")
+		return
+	}
+
+	layout := "2006-01-02T15:04:05.000Z"
+	time, err := time.Parse(layout, dateParam)
+	if err != nil {
+		BadRequest(resp, "Cannot parse date")
+		return
+	}
+
+	flights, e := flightController.FlightService.GetAll(time, startLocation, endLocation, seats)
+	if e != nil {
+		BadRequest(resp, e.Message)
+		return
+	}
+
+	Ok(resp, flights)
 }
