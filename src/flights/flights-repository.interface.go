@@ -8,7 +8,7 @@ import (
 
 type IFlightRepository interface {
 	create(flight Flight) primitive.ObjectID
-	findById(id primitive.ObjectID) Flight
+	findById(id string) Flight
 	findAll() []Flight
 	delete(id primitive.ObjectID) error
 }

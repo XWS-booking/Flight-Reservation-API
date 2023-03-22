@@ -27,3 +27,11 @@ func RegistrationFailed() *Error {
 func FlightNotCreated() *Error {
 	return &Error{Message: "Flight creation went wrong!"}
 }
+
+func FlightNotFound() *Error {
+	return &Error{Message: "Flight not found!"}
+}
+
+func FlightNotDeleted() *Error {
+	return &Error{Message: "Flight can't be deleted!"}
+}

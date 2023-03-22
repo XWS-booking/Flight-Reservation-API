@@ -1,6 +1,7 @@
 package flights
 
 import (
+	"flight_reservation_api/src/flights/dtos"
 	. "flight_reservation_api/src/flights/model"
 	. "flight_reservation_api/src/shared"
 	"fmt"
@@ -22,6 +23,8 @@ type FlightController struct {
 func (flightController *FlightController) constructor(router *mux.Router) {
 	authRouter := router.PathPrefix("/flights").Subrouter()
 	authRouter.HandleFunc("/add", flightController.Create).Methods("POST")
+	authRouter.HandleFunc("/{id}", flightController.FindById).Methods("GET")
+	authRouter.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
 }
 
 func (flightController *FlightController) Create(resp http.ResponseWriter, req *http.Request) {
@@ -40,4 +43,22 @@ func (flightController *FlightController) Create(resp http.ResponseWriter, req *
 	}
 
 	Ok(resp, id)
+}
+
+func (FlightController *FlightController) FindById(resp http.ResponseWriter, req *http.Request) {
+	id := GetPathParam(req, "id")
+	flight, e := FlightController.FlightService.FindById(StringToObjectId(id))
+	if e != nil {
+		BadRequest(resp, e.Message)
+	}
+	Ok(resp, dtos.NewFlightDto(flight))
+}
+
+func (FlightController *FlightController) Delete(resp http.ResponseWriter, req *http.Request) {
+	id := GetPathParam(req, "id")
+	e := FlightController.FlightService.Delete(StringToObjectId(id))
+	if e != nil {
+		BadRequest(resp, e.Message)
+	}
+	Ok(resp, e)
 }
