@@ -28,20 +28,18 @@ func (flightRepository *FlightRepository) Create(flight Flight) (primitive.Objec
 	return res.InsertedID.(primitive.ObjectID), nil
 }
 
-func (flightRepository *FlightRepository) GetAll(pageNumber int, pageSize int, date time.Time, startLocation string, endLocation string, seats int) ([]Flight, int, error) {
+func (flightRepository *FlightRepository) GetAll(pageNumber int, pageSize int, date primitive.DateTime, startLocation string, endLocation string, seats int) ([]Flight, int, error) {
 	collection := flightRepository.getCollection("flights")
 	var flights []Flight
 	filter := bson.D{}
-	if date.IsZero() {
-		filter = bson.D{{Key: "end_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + endLocation + ".*"}}},
-			{Key: "start_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + startLocation + ".*"}}},
-			{Key: "seats", Value: bson.D{{Key: "$gte", Value: seats}}}}
-	} else {
-		filter = bson.D{{Key: "end_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + endLocation + ".*"}}},
-			{Key: "start_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + startLocation + ".*"}}},
-			{Key: "seats", Value: bson.D{{Key: "$gte", Value: seats}}},
-			{Key: "date", Value: date}}
+	toDate := date.Time().AddDate(0, 0, 1)
+	if date.Time().IsZero() {
+		toDate = time.Now().AddDate(100, 0, 0)
 	}
+	filter = bson.D{{Key: "end_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + endLocation + ".*"}}},
+		{Key: "start_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + startLocation + ".*"}}},
+		{Key: "seats", Value: bson.D{{Key: "$gte", Value: seats}}},
+		{Key: "date", Value: bson.D{{Key: "$gte", Value: date}, {Key: "$lt", Value: toDate}}}}
 	options := new(options.FindOptions)
 	options.SetSkip(int64((pageNumber - 1) * pageSize))
 	options.SetLimit(int64(pageSize))

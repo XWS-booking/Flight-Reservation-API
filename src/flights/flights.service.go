@@ -3,7 +3,6 @@ package flights
 import (
 	. "flight_reservation_api/src/flights/model"
 	"flight_reservation_api/src/shared"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -20,7 +19,7 @@ func (flightService *FlightService) Create(flight Flight) (primitive.ObjectID, *
 	return created, nil
 }
 
-func (flightService *FlightService) GetAll(pageNumber int, pageSize int, date time.Time, startLocation string, endLocation string, seats int) ([]Flight, int, *shared.Error) {
+func (flightService *FlightService) GetAll(pageNumber int, pageSize int, date primitive.DateTime, startLocation string, endLocation string, seats int) ([]Flight, int, *shared.Error) {
 	flights, totalCount, err := flightService.FlightRepository.GetAll(pageNumber, pageSize, date, startLocation, endLocation, seats)
 	if err != nil {
 		return flights, totalCount, shared.FlightsReadFailed()
