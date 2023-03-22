@@ -50,7 +50,12 @@ func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *
 	endLocation := GetPathParam(req, "endLocation")
 	seatsParam := GetPathParam(req, "seats")
 	dateParam := GetPathParam(req, "date")
-
+	if startLocation == "null" {
+		startLocation = ""
+	}
+	if endLocation == "null" {
+		endLocation = ""
+	}
 	seats, err := strconv.Atoi(seatsParam)
 	if err != nil {
 		BadRequest(resp, "Cannot parse integer")
@@ -58,13 +63,12 @@ func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *
 	}
 
 	layout := "2006-01-02T15:04:05.000Z"
-	time, err := time.Parse(layout, dateParam)
+	date, err := time.Parse(layout, dateParam)
 	if err != nil {
-		BadRequest(resp, "Cannot parse date")
-		return
+		date = time.Time{}
 	}
 
-	flights, e := flightController.FlightService.GetAll(time, startLocation, endLocation, seats)
+	flights, e := flightController.FlightService.GetAll(date, startLocation, endLocation, seats)
 	if e != nil {
 		BadRequest(resp, e.Message)
 		return

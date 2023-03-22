@@ -27,10 +27,20 @@ func (flightRepository *FlightRepository) Create(flight Flight) (primitive.Objec
 	return res.InsertedID.(primitive.ObjectID), nil
 }
 
-func (userRepository *FlightRepository) GetAll(date time.Time, startLocation string, endLocation string, seats int) ([]Flight, error) {
-	collection := userRepository.getCollection("flights")
+func (flightRepository *FlightRepository) GetAll(date time.Time, startLocation string, endLocation string, seats int) ([]Flight, error) {
+	collection := flightRepository.getCollection("flights")
 	var flights []Flight
-	filter := bson.M{"date": primitive.NewDateTimeFromTime(date), "start_location": startLocation, "end_location": endLocation, "seats": seats}
+	filter := bson.D{}
+	if date.IsZero() {
+		filter = bson.D{{Key: "end_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + endLocation + ".*"}}},
+			{Key: "start_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + startLocation + ".*"}}},
+			{Key: "seats", Value: bson.D{{Key: "$gte", Value: seats}}}}
+	} else {
+		filter = bson.D{{Key: "end_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + endLocation + ".*"}}},
+			{Key: "start_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + startLocation + ".*"}}},
+			{Key: "seats", Value: bson.D{{Key: "$gte", Value: seats}}},
+			{Key: "date", Value: date}}
+	}
 	cur, err := collection.Find(context.TODO(), filter)
 	for cur.Next(context.TODO()) {
 		var elem Flight
