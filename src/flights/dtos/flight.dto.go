@@ -2,6 +2,7 @@ package dtos
 
 import (
 	"flight_reservation_api/src/flights/model"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -9,7 +10,7 @@ import (
 type FlightDto struct {
 	Id            primitive.ObjectID `json:"id"`
 	Seats         int                `json:"seats"`
-	Date          primitive.DateTime `json:"date"`
+	Date          time.Time          `json:"date"`
 	StartLocation string             `json:"startLocation"`
 	EndLocation   string             `json:"endLocation"`
 	Price         float64            `json:"price"`
