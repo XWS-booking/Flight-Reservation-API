@@ -28,6 +28,14 @@ func FlightNotCreated() *Error {
 	return &Error{Message: "Flight creation went wrong!"}
 }
 
+func FlightsReadFailed() *Error {
+	return &Error{Message: "Cannot read flights!"}
+}
+
+func FlightsCountFailed() *Error {
+	return &Error{Message: "Cannot count flights!"}
+}
+
 func FlightNotFound() *Error {
 	return &Error{Message: "Flight not found!"}
 }
