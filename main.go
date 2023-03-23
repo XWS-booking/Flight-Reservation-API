@@ -4,6 +4,8 @@ import (
 	. "flight_reservation_api/src/auth"
 	. "flight_reservation_api/src/database"
 	. "flight_reservation_api/src/flights"
+	. "flight_reservation_api/src/flights/repositories/flight"
+	"flight_reservation_api/src/flights/repositories/tickets"
 	"log"
 	"net/http"
 	"os"
@@ -14,7 +16,7 @@ import (
 )
 
 func main() {
-	LoadEnvs()
+	//LoadEnvs()
 	db, err := InitDB()
 	DeclareUnique(db, []UniqueField{
 		{Collection: "users", Fields: []string{"email"}},
@@ -31,7 +33,13 @@ func main() {
 	CreateAuthController(router, authService)
 
 	flightRepository := &FlightRepository{DB: db, Logger: logger}
+<<<<<<< HEAD
 	flightService := &FlightService{FlightRepository: flightRepository}
+=======
+	ticketRepository := &tickets.TicketRepository{DB: db}
+	flightService := &FlightService{FlightRepository: flightRepository, TicketRepository: ticketRepository}
+	CreateFlightController(router, flightService)
+>>>>>>> Added ticker repository and method for creating tickets
 
 	CreateFlightController(router, flightService)
 	startServer(router)

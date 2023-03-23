@@ -27,6 +27,7 @@ func (flightController *FlightController) constructor(router *mux.Router) {
 	authRouter.HandleFunc("/getAll/{pageNumber}/{pageSize}", flightController.GetAll).Methods("POST")
 	authRouter.HandleFunc("/{id}", flightController.FindById).Methods("GET")
 	authRouter.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
+	authRouter.HandleFunc("/{id}/buy-tickets/{quantity}", flightController.BuyTickets).Methods("POST")
 }
 
 func (flightController *FlightController) Create(resp http.ResponseWriter, req *http.Request) {
@@ -66,20 +67,50 @@ func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *
 	Ok(resp, dtos.NewFlightPageDto(flights, totalCount))
 }
 
-func (FlightController *FlightController) FindById(resp http.ResponseWriter, req *http.Request) {
+func (flightController *FlightController) FindById(resp http.ResponseWriter, req *http.Request) {
 	id := GetPathParam(req, "id")
-	flight, e := FlightController.FlightService.FindById(StringToObjectId(id))
+	flight, e := flightController.FlightService.FindById(StringToObjectId(id))
 	if e != nil {
 		BadRequest(resp, e.Message)
 	}
 	Ok(resp, dtos.NewFlightDto(flight))
 }
 
-func (FlightController *FlightController) Delete(resp http.ResponseWriter, req *http.Request) {
+func (flightController *FlightController) Delete(resp http.ResponseWriter, req *http.Request) {
 	id := GetPathParam(req, "id")
-	e := FlightController.FlightService.Delete(StringToObjectId(id))
+	e := flightController.FlightService.Delete(StringToObjectId(id))
 	if e != nil {
 		BadRequest(resp, e.Message)
 	}
 	Ok(resp, e)
+}
+
+func (flightController *FlightController) BuyTickets(resp http.ResponseWriter, req *http.Request) {
+	fmt.Println("hit")
+	flightId := GetPathParam(req, "id")
+	quantity := GetPathParam(req, "quantity")
+	buyerId := StringToObjectId("6418a6c8e509fcd8c71a4f79")
+
+	quantityNum, err := strconv.Atoi(quantity)
+	if err != nil {
+		BadRequest(resp, "Quantity should be a number")
+		return
+	}
+
+	ticketDto := dtos.NewBuyTicketDto(StringToObjectId(flightId), buyerId, quantityNum)
+	if err != nil {
+		BadRequest(resp, "You request contains wrong data!")
+		return
+	}
+	fmt.Println("conversion done")
+
+	ticketIds, error := flightController.FlightService.BuyTickets(*ticketDto)
+	if error != nil {
+		BadRequest(resp, error.Message)
+		return
+	}
+	fmt.Println("Service done")
+	dto := dtos.NewTicketIdsDto(ticketIds)
+	fmt.Println(dto)
+	Ok(resp, dto)
 }

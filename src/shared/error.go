@@ -43,3 +43,11 @@ func FlightNotFound() *Error {
 func FlightNotDeleted() *Error {
 	return &Error{Message: "Flight can't be deleted!"}
 }
+
+func NotEnoughSeats() *Error {
+	return &Error{Message: "Not enough seats on the flight!"}
+}
+
+func TicketServiceUnavailable() *Error {
+	return &Error{Message: "Ticket service unavailable!"}
+}
