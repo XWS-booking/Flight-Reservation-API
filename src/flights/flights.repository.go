@@ -2,6 +2,7 @@ package flights
 
 import (
 	"context"
+	"flight_reservation_api/src/flights/dtos"
 	. "flight_reservation_api/src/flights/model"
 	"log"
 	"os"
@@ -28,21 +29,21 @@ func (flightRepository *FlightRepository) Create(flight Flight) (primitive.Objec
 	return res.InsertedID.(primitive.ObjectID), nil
 }
 
-func (flightRepository *FlightRepository) GetAll(pageNumber int, pageSize int, date time.Time, startLocation string, endLocation string, seats int) ([]Flight, int, error) {
+func (flightRepository *FlightRepository) GetAll(page dtos.PageDto, flight Flight) ([]Flight, int, error) {
 	collection := flightRepository.getCollection("flights")
 	var flights []Flight
 	filter := bson.D{}
-	toDate := date.AddDate(0, 0, 1)
-	if date.IsZero() {
+	toDate := flight.Date.AddDate(0, 0, 1)
+	if flight.Date.IsZero() {
 		toDate = time.Now().AddDate(100, 0, 0)
 	}
-	filter = bson.D{{Key: "end_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + endLocation + ".*"}}},
-		{Key: "start_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + startLocation + ".*"}}},
-		{Key: "seats", Value: bson.D{{Key: "$gte", Value: seats}}},
-		{Key: "date", Value: bson.D{{Key: "$gte", Value: date}, {Key: "$lt", Value: toDate}}}}
+	filter = bson.D{{Key: "end_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + flight.EndLocation + ".*"}}},
+		{Key: "start_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + flight.StartLocation + ".*"}}},
+		{Key: "seats", Value: bson.D{{Key: "$gte", Value: flight.Seats}}},
+		{Key: "date", Value: bson.D{{Key: "$gte", Value: flight.Date}, {Key: "$lt", Value: toDate}}}}
 	options := new(options.FindOptions)
-	options.SetSkip(int64((pageNumber - 1) * pageSize))
-	options.SetLimit(int64(pageSize))
+	options.SetSkip(int64((page.PageNumber - 1) * page.PageSize))
+	options.SetLimit(int64(page.PageSize))
 
 	cur, err := collection.Find(context.TODO(), filter, options)
 	totalCount, _ := flightRepository.GetTotalCount(filter)
@@ -54,7 +55,7 @@ func (flightRepository *FlightRepository) GetAll(pageNumber int, pageSize int, d
 		var elem Flight
 		err := cur.Decode(&elem)
 		if err != nil {
-			log.Fatal(err)
+			return flights, totalCount, err
 		}
 		flights = append(flights, elem)
 	}

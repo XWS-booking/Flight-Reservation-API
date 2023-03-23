@@ -57,7 +57,7 @@ func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *
 		return
 	}
 
-	flights, totalCount, e := flightController.FlightService.GetAll(pageNumber, pageSize, flight.Date, flight.StartLocation, flight.EndLocation, flight.Seats)
+	flights, totalCount, e := flightController.FlightService.GetAll(dtos.NewPageDto(pageSize, pageNumber), flight)
 	if e != nil {
 		BadRequest(resp, e.Message)
 		return
