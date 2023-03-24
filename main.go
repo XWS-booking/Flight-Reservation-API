@@ -38,7 +38,7 @@ func main() {
 }
 
 func startServer(router *mux.Router) {
-	headersOk := gorillaHandlers.AllowedHeaders([]string{"Content-Type"})
+	headersOk := gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
 	originsOk := gorillaHandlers.AllowedOrigins([]string{"http://localhost:3000"})
 	methodsOk := gorillaHandlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT"})
 	server := http.Server{
