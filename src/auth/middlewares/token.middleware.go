@@ -25,12 +25,10 @@ func TokenValidationMiddleware(next http.Handler) http.Handler {
 			var secretKey = []byte(os.Getenv("JWT_SECRET"))
 			return secretKey, nil
 		})
-		fmt.Println(err)
 		if err != nil {
 			shared.Unauthorized(rw)
 			return
 		}
-
 		context.Set(r, "Token", token)
 		next.ServeHTTP(rw, r)
 	})
