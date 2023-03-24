@@ -7,7 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	gorillaHandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -30,11 +32,21 @@ func main() {
 
 	flightRepository := &FlightRepository{DB: db, Logger: logger}
 	flightService := &FlightService{FlightRepository: flightRepository}
-	CreateFlightController(router, flightService)
 
+	CreateFlightController(router, flightService)
 	startServer(router)
 }
 
 func startServer(router *mux.Router) {
-	log.Fatal(http.ListenAndServe(":8000", router))
+	headersOk := gorillaHandlers.AllowedHeaders([]string{"Content-Type"})
+	originsOk := gorillaHandlers.AllowedOrigins([]string{"http://localhost:3000"})
+	methodsOk := gorillaHandlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT"})
+	server := http.Server{
+		Addr:         ":8000",
+		Handler:      gorillaHandlers.CORS(originsOk, headersOk, methodsOk)(router),
+		IdleTimeout:  120 * time.Second,
+		ReadTimeout:  1 * time.Second,
+		WriteTimeout: 1 * time.Second,
+	}
+	log.Fatal(server.ListenAndServe())
 }

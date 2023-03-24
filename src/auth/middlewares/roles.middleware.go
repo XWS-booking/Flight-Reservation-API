@@ -11,19 +11,19 @@ import (
 
 func RolesMiddleware(roles []model.UserRole) func(h http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
+		fn := func(rw http.ResponseWriter, r *http.Request) {
 			var token *jwt.Token = context.Get(r, "Token").(*jwt.Token)
 			claims, ok := token.Claims.(jwt.MapClaims)
 			if !ok || !token.Valid {
-				Unauthorized(w)
+				Unauthorized(rw)
 				return
 			}
 			role := claims["role"].(float64)
 			if !containsRole(roles, int(role)) {
-				Forbidden(w)
+				Forbidden(rw)
 				return
 			}
-			h.ServeHTTP(w, r)
+			h.ServeHTTP(rw, r)
 		}
 
 		return http.HandlerFunc(fn)
