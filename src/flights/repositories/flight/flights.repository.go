@@ -1,9 +1,10 @@
-package flights
+package flight
 
 import (
 	"context"
 	"flight_reservation_api/src/flights/dtos"
 	. "flight_reservation_api/src/flights/model"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -29,7 +30,7 @@ func (flightRepository *FlightRepository) Create(flight Flight) (primitive.Objec
 	return res.InsertedID.(primitive.ObjectID), nil
 }
 
-func (flightRepository *FlightRepository) GetAll(page dtos.PageDto, flight Flight) ([]Flight, int, error) {
+func (flightRepository *FlightRepository) FindAll(page dtos.PageDto, flight Flight) ([]Flight, int, error) {
 	collection := flightRepository.getCollection("flights")
 	var flights []Flight
 	filter := bson.D{}
@@ -46,7 +47,7 @@ func (flightRepository *FlightRepository) GetAll(page dtos.PageDto, flight Fligh
 	options.SetLimit(int64(page.PageSize))
 
 	cur, err := collection.Find(context.TODO(), filter, options)
-	totalCount, _ := flightRepository.GetTotalCount(filter)
+	totalCount, _ := flightRepository.getTotalCount(filter)
 	if err != nil {
 		return flights, totalCount, err
 	}
@@ -62,7 +63,7 @@ func (flightRepository *FlightRepository) GetAll(page dtos.PageDto, flight Fligh
 	return flights, totalCount, nil
 }
 
-func (flightRepository *FlightRepository) GetTotalCount(filter bson.D) (int, error) {
+func (flightRepository *FlightRepository) getTotalCount(filter bson.D) (int, error) {
 	collection := flightRepository.getCollection("flights")
 	count, err := collection.CountDocuments(context.TODO(), filter)
 	if err != nil {
@@ -71,7 +72,7 @@ func (flightRepository *FlightRepository) GetTotalCount(filter bson.D) (int, err
 	return int(count), nil
 }
 
-func (flightRepository *FlightRepository) findById(id primitive.ObjectID) (Flight, error) {
+func (flightRepository *FlightRepository) FindById(id primitive.ObjectID) (Flight, error) {
 	collection := flightRepository.getCollection("flights")
 	var flight Flight
 	filter := bson.M{"_id": id}
@@ -83,7 +84,7 @@ func (flightRepository *FlightRepository) findById(id primitive.ObjectID) (Fligh
 	return flight, nil
 }
 
-func (flightRepository *FlightRepository) delete(id primitive.ObjectID) error {
+func (flightRepository *FlightRepository) Delete(id primitive.ObjectID) error {
 	collection := flightRepository.getCollection("flights")
 	filter := bson.M{"_id": id}
 	_, err := collection.DeleteOne(context.TODO(), filter)
@@ -92,6 +93,15 @@ func (flightRepository *FlightRepository) delete(id primitive.ObjectID) error {
 		return err
 	}
 	return nil
+}
+
+func (flightRepository *FlightRepository) Update(flight *Flight) error {
+	collection := flightRepository.getCollection("flights")
+	fmt.Println(flight)
+	filter := bson.M{"_id": flight.Id}
+	update := bson.D{{"$set", bson.D{{"freeSeats", flight.FreeSeats}}}}
+	_, err := collection.UpdateOne(context.TODO(), filter, update)
+	return err
 }
 
 func (flightRepository *FlightRepository) getCollection(key string) *mongo.Collection {

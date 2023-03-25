@@ -7,7 +7,7 @@ import (
 )
 
 type IUserRepository interface {
-	create(user User) primitive.ObjectID
-	findById(id primitive.ObjectID) User
-	getOneByEmail(email string) User
+	Create(user User) (primitive.ObjectID, error)
+	FindById(id primitive.ObjectID) (User, error)
+	FindByEmail(email string) (User, error)
 }

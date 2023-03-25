@@ -12,7 +12,7 @@ import (
 )
 
 type AuthService struct {
-	UserRepository *UserRepository
+	UserRepository IUserRepository
 }
 
 func (authService *AuthService) Register(user User) (User, *Error) {
@@ -22,12 +22,12 @@ func (authService *AuthService) Register(user User) (User, *Error) {
 	}
 	user.Password = hashedPassword
 
-	id, err := authService.UserRepository.create(user)
+	id, err := authService.UserRepository.Create(user)
 	if err != nil {
 		return User{}, RegistrationFailed()
 	}
 
-	created, err := authService.UserRepository.findById(id)
+	created, err := authService.UserRepository.FindById(id)
 	if err != nil {
 		return User{}, UserDoesntExist()
 	}
@@ -36,7 +36,7 @@ func (authService *AuthService) Register(user User) (User, *Error) {
 }
 
 func (authService *AuthService) SignIn(email string, password string) (string, *Error) {
-	user, err := authService.UserRepository.findByEmail(email)
+	user, err := authService.UserRepository.FindByEmail(email)
 	if err != nil {
 		return "", InvalidCredentials()
 	}

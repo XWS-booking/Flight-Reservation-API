@@ -4,12 +4,14 @@ import (
 	. "flight_reservation_api/src/auth"
 	. "flight_reservation_api/src/database"
 	. "flight_reservation_api/src/flights"
+	. "flight_reservation_api/src/flights/repositories/flight"
+	"flight_reservation_api/src/flights/repositories/tickets"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
-	gorillaHandlers "github.com/gorilla/handlers"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -31,19 +33,20 @@ func main() {
 	CreateAuthController(router, authService)
 
 	flightRepository := &FlightRepository{DB: db, Logger: logger}
-	flightService := &FlightService{FlightRepository: flightRepository}
-
+	ticketRepository := &tickets.TicketRepository{DB: db}
+	flightService := &FlightService{FlightRepository: flightRepository, TicketRepository: ticketRepository}
 	CreateFlightController(router, flightService)
+
 	startServer(router)
 }
 
 func startServer(router *mux.Router) {
-	headersOk := gorillaHandlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
-	originsOk := gorillaHandlers.AllowedOrigins([]string{"http://localhost:3000"})
-	methodsOk := gorillaHandlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT"})
+	headersOk := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+	originsOk := handlers.AllowedOrigins([]string{"http://localhost:3000"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT"})
 	server := http.Server{
 		Addr:         ":8000",
-		Handler:      gorillaHandlers.CORS(originsOk, headersOk, methodsOk)(router),
+		Handler:      handlers.CORS(originsOk, headersOk, methodsOk)(router),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
