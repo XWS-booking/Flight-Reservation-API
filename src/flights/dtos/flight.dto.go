@@ -8,21 +8,21 @@ import (
 )
 
 type FlightDto struct {
-	Id            primitive.ObjectID `json:"id"`
-	Seats         int                `json:"seats"`
-	Date          time.Time          `json:"date"`
-	StartLocation string             `json:"startLocation"`
-	EndLocation   string             `json:"endLocation"`
-	Price         float64            `json:"price"`
+	Id          primitive.ObjectID `json:"id"`
+	Seats       int                `json:"seats"`
+	Date        time.Time          `json:"date"`
+	Departure   string             `json:"departure"`
+	Destination string             `json:"destination"`
+	Price       float64            `json:"price"`
 }
 
 func NewFlightDto(flight model.Flight) *FlightDto {
 	return &FlightDto{
-		Id:            flight.Id,
-		Seats:         flight.Seats,
-		Date:          flight.Date,
-		StartLocation: flight.StartLocation,
-		EndLocation:   flight.EndLocation,
-		Price:         flight.Price,
+		Id:          flight.Id,
+		Seats:       flight.Seats,
+		Date:        flight.Date,
+		Departure:   flight.Departure,
+		Destination: flight.Destination,
+		Price:       flight.Price,
 	}
 }

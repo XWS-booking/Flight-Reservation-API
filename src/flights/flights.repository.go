@@ -37,8 +37,8 @@ func (flightRepository *FlightRepository) GetAll(page dtos.PageDto, flight Fligh
 	if flight.Date.IsZero() {
 		toDate = time.Now().AddDate(100, 0, 0)
 	}
-	filter = bson.D{{Key: "end_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + flight.EndLocation + ".*"}}},
-		{Key: "start_location", Value: bson.D{{Key: "$regex", Value: "(?i).*" + flight.StartLocation + ".*"}}},
+	filter = bson.D{{Key: "destination", Value: bson.D{{Key: "$regex", Value: "(?i).*" + flight.Destination + ".*"}}},
+		{Key: "departure", Value: bson.D{{Key: "$regex", Value: "(?i).*" + flight.Departure + ".*"}}},
 		{Key: "seats", Value: bson.D{{Key: "$gte", Value: flight.Seats}}},
 		{Key: "date", Value: bson.D{{Key: "$gte", Value: flight.Date}, {Key: "$lt", Value: toDate}}}}
 	options := new(options.FindOptions)
