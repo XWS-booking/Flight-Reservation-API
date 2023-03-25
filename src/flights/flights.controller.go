@@ -45,7 +45,7 @@ func (flightController *FlightController) Create(resp http.ResponseWriter, req *
 		return
 	}
 
-	Ok(resp, id)
+	Ok(&resp, id)
 }
 
 func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *http.Request) {
@@ -64,7 +64,7 @@ func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *
 		return
 	}
 
-	Ok(resp, dtos.NewFlightPageDto(flights, totalCount))
+	Ok(&resp, dtos.NewFlightPageDto(flights, totalCount))
 }
 
 func (flightController *FlightController) FindById(resp http.ResponseWriter, req *http.Request) {
@@ -73,7 +73,7 @@ func (flightController *FlightController) FindById(resp http.ResponseWriter, req
 	if e != nil {
 		BadRequest(resp, e.Message)
 	}
-	Ok(resp, dtos.NewFlightDto(flight))
+	Ok(&resp, dtos.NewFlightDto(flight))
 }
 
 func (flightController *FlightController) Delete(resp http.ResponseWriter, req *http.Request) {
@@ -82,7 +82,7 @@ func (flightController *FlightController) Delete(resp http.ResponseWriter, req *
 	if e != nil {
 		BadRequest(resp, e.Message)
 	}
-	Ok(resp, e)
+	Ok(&resp, e)
 }
 
 func (flightController *FlightController) BuyTickets(resp http.ResponseWriter, req *http.Request) {
@@ -102,15 +102,12 @@ func (flightController *FlightController) BuyTickets(resp http.ResponseWriter, r
 		BadRequest(resp, "You request contains wrong data!")
 		return
 	}
-	fmt.Println("conversion done")
 
 	ticketIds, error := flightController.FlightService.BuyTickets(*ticketDto)
 	if error != nil {
 		BadRequest(resp, error.Message)
 		return
 	}
-	fmt.Println("Service done")
 	dto := dtos.NewTicketIdsDto(ticketIds)
-	fmt.Println(dto)
-	Ok(resp, dto)
+	Ok(&resp, dto)
 }

@@ -39,7 +39,7 @@ func (authController *AuthController) Signin(resp http.ResponseWriter, req *http
 		return
 	}
 
-	Ok(resp, dtos.NewJwtDto(token))
+	Ok(&resp, dtos.NewJwtDto(token))
 }
 
 func (authController *AuthController) Register(resp http.ResponseWriter, req *http.Request) {
@@ -49,12 +49,12 @@ func (authController *AuthController) Register(resp http.ResponseWriter, req *ht
 		BadRequest(resp, "Something wrong with provided data!")
 		return
 	}
-
+	user.Role = UserRole(REGULAR)
 	user, e := authController.AuthService.Register(user)
 	if e != nil {
 		BadRequest(resp, e.Message)
 		return
 	}
 
-	Ok(resp, dtos.NewUserDto(user))
+	Ok(&resp, dtos.NewUserDto(user))
 }

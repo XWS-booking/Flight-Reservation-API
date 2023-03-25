@@ -10,9 +10,10 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func Ok(resp http.ResponseWriter, payload any) {
-	resp.WriteHeader(http.StatusOK)
-	json.NewEncoder(resp).Encode(payload)
+func Ok(resp *http.ResponseWriter, payload any) {
+	var response http.ResponseWriter = *resp
+	response.WriteHeader(http.StatusOK)
+	json.NewEncoder(response).Encode(payload)
 }
 
 func BadRequest(resp http.ResponseWriter, message string) {

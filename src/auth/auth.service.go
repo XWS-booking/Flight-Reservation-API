@@ -31,7 +31,6 @@ func (authService *AuthService) Register(user User) (User, *Error) {
 	if err != nil {
 		return User{}, UserDoesntExist()
 	}
-
 	return created, nil
 }
 
