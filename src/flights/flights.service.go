@@ -73,6 +73,14 @@ func (flightService *FlightService) BuyTickets(dto dtos.BuyTicketDto) ([]primiti
 	return ticketIds, nil
 }
 
+func (flightService *FlightService) FindTicketsByBuyer(userId primitive.ObjectID) ([]FlightTicket, *shared.Error) {
+	tickets, err := flightService.TicketRepository.FindAllByBuyer(userId)
+	if err != nil {
+		return []FlightTicket{}, shared.TicketServiceUnavailable()
+	}
+	return tickets, nil
+}
+
 func createTickets(dto dtos.BuyTicketDto) []Ticket {
 	tickets := make([]Ticket, 0)
 

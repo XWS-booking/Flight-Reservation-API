@@ -3,10 +3,14 @@ package tickets
 import (
 	"context"
 	"flight_reservation_api/src/flights/model"
+	"fmt"
+	"os"
+	"time"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"os"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type TicketRepository struct {
@@ -30,25 +34,40 @@ func (ticketRepository *TicketRepository) CreateMany(tickets []model.Ticket) ([]
 
 }
 
-func (ticketRepository *TicketRepository) FindAllByBuyer(buyerId primitive.ObjectID) ([]model.Ticket, error) {
+func (ticketRepository *TicketRepository) FindAllByBuyer(buyerId primitive.ObjectID) ([]model.FlightTicket, error) {
 	collection := ticketRepository.getCollection("tickets")
-	filter := bson.M{"buyerId": buyerId}
-	cur, err := collection.Find(context.TODO(), filter)
+	matchStage := bson.D{{"$match", bson.D{{"buyer", buyerId}}}}
+	lookupStage := bson.D{
+		{"$lookup", bson.D{
+			{"from", "flights"},
+			{"localField", "flightId"},
+			{"foreignField", "_id"},
+			{"as", "flight"},
+		}},
+	}
+	projectStage := bson.D{
+		{"$project", bson.D{
+			{"_id", 0},
+			{"ticket", "$$ROOT"},
+			{"flight", bson.D{
+				{"$arrayElemAt", []interface{}{"$flight", 0}},
+			}},
+		}},
+	}
 
+	ctx := context.TODO()
+	cursor, err := collection.Aggregate(ctx, mongo.Pipeline{matchStage, lookupStage, projectStage}, options.Aggregate().SetMaxTime(10*time.Second))
+	fmt.Println(cursor)
 	if err != nil {
-		return []model.Ticket{}, err
+		return nil, err
 	}
 
-	var result []model.Ticket
-	for cur.Next(context.TODO()) {
-		var ticket model.Ticket
-		err := cur.Decode(&ticket)
-		if err != nil {
-			return []model.Ticket{}, err
-		}
-		result = append(result, ticket)
+	flightTickets, err := loadFlightTickets(cursor, ctx)
+	if err != nil {
+		return nil, err
 	}
-	return result, nil
+
+	return flightTickets, nil
 }
 
 func (ticketRepository *TicketRepository) getCollection(key string) *mongo.Collection {
@@ -61,4 +80,19 @@ func processTickets(tickets []model.Ticket) []interface{} {
 		interfaces[i] = v
 	}
 	return interfaces
+}
+
+func loadFlightTickets(cursor *mongo.Cursor, ctx context.Context) ([]model.FlightTicket, error) {
+	var ticketFlights []model.FlightTicket
+	for cursor.Next(ctx) {
+		var result model.FlightTicket
+		err := cursor.Decode(&result)
+
+		fmt.Println(err, result)
+		if err != nil {
+			return nil, err
+		}
+		ticketFlights = append(ticketFlights, result)
+	}
+	return ticketFlights, nil
 }
