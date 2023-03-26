@@ -6,16 +6,17 @@ import (
 	. "flight_reservation_api/src/flights"
 	. "flight_reservation_api/src/flights/repositories/flight"
 	"flight_reservation_api/src/flights/repositories/tickets"
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	//LoadEnvs()
+	LoadEnvs()
 	db, err := InitDB()
 	DeclareUnique(db, []UniqueField{
 		{Collection: "users", Fields: []string{"email"}},
