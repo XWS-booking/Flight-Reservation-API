@@ -22,12 +22,13 @@ type FlightController struct {
 }
 
 func (flightController *FlightController) constructor(router *mux.Router) {
-	authRouter := router.PathPrefix("/flights").Subrouter()
-	authRouter.HandleFunc("/add", flightController.Create).Methods("POST")
-	authRouter.HandleFunc("/getAll/{pageNumber}/{pageSize}", flightController.GetAll).Methods("POST")
-	authRouter.HandleFunc("/{id}", flightController.FindById).Methods("GET")
-	authRouter.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
-	authRouter.HandleFunc("/{id}/buy-tickets/{quantity}", flightController.BuyTickets).Methods("POST")
+	flightRouter := router.PathPrefix("/flights").Subrouter()
+	flightRouter.HandleFunc("/add", flightController.Create).Methods("POST")
+	flightRouter.HandleFunc("/getAll/{pageNumber}/{pageSize}", flightController.GetAll).Methods("POST")
+	flightRouter.HandleFunc("/{id}", flightController.FindById).Methods("GET")
+	flightRouter.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
+	flightRouter.HandleFunc("/{id}/buy-tickets/{quantity}", flightController.BuyTickets).Methods("POST")
+	flightRouter.HandleFunc("/tickets/listing", flightController.ListTickets).Methods("GET")
 }
 
 func (flightController *FlightController) Create(resp http.ResponseWriter, req *http.Request) {
@@ -83,6 +84,18 @@ func (flightController *FlightController) Delete(resp http.ResponseWriter, req *
 		BadRequest(resp, e.Message)
 	}
 	Ok(&resp, e)
+}
+
+func (flightController *FlightController) ListTickets(resp http.ResponseWriter, req *http.Request) {
+	buyerId := StringToObjectId("6418a6c8e509fcd8c71a4f79")
+
+	tickets, err := flightController.FlightService.FindTicketsByBuyer(buyerId)
+	if err != nil {
+		BadRequest(resp, "Ticket service unavailable!")
+		return
+	}
+
+	Ok(&resp, dtos.NewFlightTicketDto(tickets))
 }
 
 func (flightController *FlightController) BuyTickets(resp http.ResponseWriter, req *http.Request) {
