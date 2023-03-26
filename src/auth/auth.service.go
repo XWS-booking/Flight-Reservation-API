@@ -46,6 +46,14 @@ func (authService *AuthService) SignIn(email string, password string) (string, *
 	return generateToken(user)
 }
 
+func (authService *AuthService) GetCurrentUser(userId string) (User, *Error) {
+	user, err := authService.UserRepository.FindById(StringToObjectId(userId))
+	if err != nil {
+		return user, InvalidCredentials()
+	}
+	return user, nil
+}
+
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err

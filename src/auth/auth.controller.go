@@ -2,10 +2,13 @@ package auth
 
 import (
 	"flight_reservation_api/src/auth/dtos"
+	"flight_reservation_api/src/auth/middlewares"
 	. "flight_reservation_api/src/auth/model"
 	. "flight_reservation_api/src/shared"
+	"fmt"
 	"net/http"
 
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 )
 
@@ -22,6 +25,10 @@ type AuthController struct {
 func (authController *AuthController) constructor(router *mux.Router) {
 	authRouter := router.PathPrefix("/auth").Subrouter()
 	authRouter.HandleFunc("/signin", authController.Signin).Methods("POST")
+	getUserRouter := authRouter.PathPrefix("").Subrouter()
+	getUserRouter.Use(middlewares.TokenValidationMiddleware)
+	getUserRouter.Use(middlewares.UserMiddleware)
+	getUserRouter.HandleFunc("/user", authController.GetCurrentUser).Methods("GET")
 	authRouter.HandleFunc("/register", authController.Register).Methods("POST")
 }
 
@@ -40,6 +47,19 @@ func (authController *AuthController) Signin(resp http.ResponseWriter, req *http
 	}
 
 	Ok(&resp, dtos.NewJwtDto(token))
+}
+
+func (authController *AuthController) GetCurrentUser(resp http.ResponseWriter, req *http.Request) {
+	userid := context.Get(req, "id").(string)
+	fmt.Println(userid)
+
+	user, e := authController.AuthService.GetCurrentUser(userid)
+	if e != nil {
+		BadRequest(resp, e.Message)
+		return
+	}
+
+	Ok(&resp, dtos.NewUserDto(user))
 }
 
 func (authController *AuthController) Register(resp http.ResponseWriter, req *http.Request) {
