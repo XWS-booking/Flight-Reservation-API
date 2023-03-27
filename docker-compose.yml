@@ -17,7 +17,7 @@ services:
     networks:
       - backend
     environment:
-      PORT: ${FLIGHT_SERVICE_PORT}
+      PORT: 8080
       DATABASE_NAME: XWS
       JWT_SECRET: secret
       DATABASE_CONNECTION_STRING: mongodb+srv://xws:lozinka123@cluster0.yqfgbck.mongodb.net/?retryWrites=true&w=majority
@@ -30,7 +30,7 @@ services:
     networks:
       - backend
     environment:
-      PORT: ${FLIGHT_SERVICE_PORT}
+      PORT: 8080
       DATABASE_NAME: AUTH
       JWT_SECRET: secret
       DATABASE_CONNECTION_STRING: mongodb+srv://xws:lozinka123@cluster0.yqfgbck.mongodb.net/?retryWrites=true&w=majority
