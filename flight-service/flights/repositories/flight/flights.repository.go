@@ -40,7 +40,7 @@ func (flightRepository *FlightRepository) FindAll(page dtos.PageDto, flight Flig
 	}
 	filter = bson.D{{Key: "destination", Value: bson.D{{Key: "$regex", Value: "(?i).*" + flight.Destination + ".*"}}},
 		{Key: "departure", Value: bson.D{{Key: "$regex", Value: "(?i).*" + flight.Departure + ".*"}}},
-		{Key: "seats", Value: bson.D{{Key: "$gte", Value: flight.Seats}}},
+		{Key: "freeSeats", Value: bson.D{{Key: "$gte", Value: flight.FreeSeats}}},
 		{Key: "date", Value: bson.D{{Key: "$gte", Value: flight.Date}, {Key: "$lt", Value: toDate}}}}
 	options := new(options.FindOptions)
 	options.SetSkip(int64((page.PageNumber - 1) * page.PageSize))
