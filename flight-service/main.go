@@ -5,7 +5,8 @@ import (
 	. "flight_reservation_api/src/database"
 	. "flight_reservation_api/src/flights"
 	. "flight_reservation_api/src/flights/repositories/flight"
-	"flight_reservation_api/src/flights/repositories/tickets"
+	. "flight_reservation_api/src/flights/repositories/tickets"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +17,6 @@ import (
 )
 
 func main() {
-	LoadEnvs()
 	db, err := InitDB()
 	DeclareUnique(db, []UniqueField{
 		{Collection: "users", Fields: []string{"email"}},
@@ -33,7 +33,7 @@ func main() {
 	CreateAuthController(router, authService)
 
 	flightRepository := &FlightRepository{DB: db, Logger: logger}
-	ticketRepository := &tickets.TicketRepository{DB: db}
+	ticketRepository := &TicketRepository{DB: db}
 	flightService := &FlightService{FlightRepository: flightRepository, TicketRepository: ticketRepository}
 	CreateFlightController(router, flightService)
 
@@ -45,7 +45,7 @@ func startServer(router *mux.Router) {
 	originsOk := handlers.AllowedOrigins([]string{"http://localhost:3000"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT"})
 	server := http.Server{
-		Addr:         ":8000",
+		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),
 		Handler:      handlers.CORS(originsOk, headersOk, methodsOk)(router),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  100 * time.Second,
