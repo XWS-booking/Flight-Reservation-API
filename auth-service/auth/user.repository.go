@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	. "flight_reservation_api/src/auth/model"
+	. "flight_reservation_api/auth/model"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

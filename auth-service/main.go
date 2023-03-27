@@ -1,10 +1,8 @@
 package main
 
 import (
+	. "flight_reservation_api/auth"
 	. "flight_reservation_api/database"
-	. "flight_reservation_api/flights"
-	. "flight_reservation_api/flights/repositories/flight"
-	. "flight_reservation_api/flights/repositories/tickets"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"log"
@@ -25,11 +23,9 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	logger := log.New(os.Stdout, "[Users-api] ", log.LstdFlags)
-
-	flightRepository := &FlightRepository{DB: db, Logger: logger}
-	ticketRepository := &TicketRepository{DB: db}
-	flightService := &FlightService{FlightRepository: flightRepository, TicketRepository: ticketRepository}
-	CreateFlightController(router, flightService)
+	userRepository := &UserRepository{DB: db, Logger: logger}
+	authService := &AuthService{UserRepository: userRepository}
+	CreateAuthController(router, authService)
 
 	startServer(router)
 }

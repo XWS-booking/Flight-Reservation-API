@@ -1,7 +1,7 @@
 package tickets
 
 import (
-	"flight_reservation_api/src/flights/model"
+	"flight_reservation_api/flights/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

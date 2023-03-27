@@ -1,7 +1,7 @@
 package dtos
 
 import (
-	"flight_reservation_api/src/flights/model"
+	"flight_reservation_api/flights/model"
 )
 
 type FlightPageDto struct {

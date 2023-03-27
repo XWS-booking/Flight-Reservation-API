@@ -22,6 +22,18 @@ services:
       JWT_SECRET: secret
       DATABASE_CONNECTION_STRING: mongodb+srv://xws:lozinka123@cluster0.yqfgbck.mongodb.net/?retryWrites=true&w=majority
 
+  auth-service:
+    image: auth-service:compose_build
+    build:
+        context: ./auth-service
+        dockerfile: Dockerfile
+    networks:
+      - backend
+    environment:
+      PORT: ${FLIGHT_SERVICE_PORT}
+      DATABASE_NAME: AUTH
+      JWT_SECRET: secret
+      DATABASE_CONNECTION_STRING: mongodb+srv://xws:lozinka123@cluster0.yqfgbck.mongodb.net/?retryWrites=true&w=majority
 networks:
   backend:
     driver: bridge

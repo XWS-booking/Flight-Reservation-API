@@ -1,9 +1,9 @@
 package flights
 
 import (
-	"flight_reservation_api/src/flights/dtos"
-	. "flight_reservation_api/src/flights/model"
-	. "flight_reservation_api/src/shared"
+	"flight_reservation_api/flights/dtos"
+	. "flight_reservation_api/flights/model"
+	. "flight_reservation_api/shared"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -22,13 +22,12 @@ type FlightController struct {
 }
 
 func (flightController *FlightController) constructor(router *mux.Router) {
-	flightRouter := router.PathPrefix("/flights").Subrouter()
-	flightRouter.HandleFunc("/add", flightController.Create).Methods("POST")
-	flightRouter.HandleFunc("/getAll/{pageNumber}/{pageSize}", flightController.GetAll).Methods("POST")
-	flightRouter.HandleFunc("/{id}", flightController.FindById).Methods("GET")
-	flightRouter.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
-	flightRouter.HandleFunc("/{id}/buy-tickets/{quantity}", flightController.BuyTickets).Methods("POST")
-	flightRouter.HandleFunc("/tickets/listing", flightController.ListTickets).Methods("GET")
+	router.HandleFunc("/add", flightController.Create).Methods("POST")
+	router.HandleFunc("/getAll/{pageNumber}/{pageSize}", flightController.GetAll).Methods("POST")
+	router.HandleFunc("/{id}", flightController.FindById).Methods("GET")
+	router.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
+	router.HandleFunc("/{id}/buy-tickets/{quantity}", flightController.BuyTickets).Methods("POST")
+	router.HandleFunc("/tickets/listing", flightController.ListTickets).Methods("GET")
 }
 
 func (flightController *FlightController) Create(resp http.ResponseWriter, req *http.Request) {

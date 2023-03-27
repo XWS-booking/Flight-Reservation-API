@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"flight_reservation_api/src/shared"
+	"flight_reservation_api/shared"
 	"fmt"
 	"net/http"
 	"os"

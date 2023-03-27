@@ -1,8 +1,8 @@
 package flight
 
 import (
-	"flight_reservation_api/src/flights/dtos"
-	. "flight_reservation_api/src/flights/model"
+	"flight_reservation_api/flights/dtos"
+	. "flight_reservation_api/flights/model"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

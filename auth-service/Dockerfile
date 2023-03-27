@@ -1,8 +1,8 @@
 FROM golang:alpine
-WORKDIR /flight-service
+WORKDIR /auth-service
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN go build -o flights-app .
+RUN go build -o auth-app .
 EXPOSE 8080
-CMD ["./flights-app"]
+CMD ["./auth-app"]

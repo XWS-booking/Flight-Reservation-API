@@ -1,7 +1,7 @@
 package dtos
 
 import (
-	"flight_reservation_api/src/flights/model"
+	"flight_reservation_api/flights/model"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"

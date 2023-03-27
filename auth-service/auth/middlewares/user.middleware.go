@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	. "flight_reservation_api/src/shared"
+	. "flight_reservation_api/shared"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/context"

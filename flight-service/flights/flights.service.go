@@ -1,11 +1,11 @@
 package flights
 
 import (
-	"flight_reservation_api/src/flights/dtos"
-	. "flight_reservation_api/src/flights/model"
-	"flight_reservation_api/src/flights/repositories/flight"
-	"flight_reservation_api/src/flights/repositories/tickets"
-	"flight_reservation_api/src/shared"
+	"flight_reservation_api/flights/dtos"
+	. "flight_reservation_api/flights/model"
+	"flight_reservation_api/flights/repositories/flight"
+	"flight_reservation_api/flights/repositories/tickets"
+	"flight_reservation_api/shared"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

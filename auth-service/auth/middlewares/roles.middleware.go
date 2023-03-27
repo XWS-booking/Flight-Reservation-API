@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"flight_reservation_api/src/auth/model"
-	. "flight_reservation_api/src/shared"
+	"flight_reservation_api/auth/model"
+	. "flight_reservation_api/shared"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"

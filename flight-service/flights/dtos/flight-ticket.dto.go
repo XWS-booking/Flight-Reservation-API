@@ -1,6 +1,6 @@
 package dtos
 
-import "flight_reservation_api/src/flights/model"
+import "flight_reservation_api/flights/model"
 
 type FlightTicketDto struct {
 	Tickets []model.FlightTicket `json:"tickets"`

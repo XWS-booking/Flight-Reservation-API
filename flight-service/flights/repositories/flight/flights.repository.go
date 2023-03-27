@@ -2,8 +2,8 @@ package flight
 
 import (
 	"context"
-	"flight_reservation_api/src/flights/dtos"
-	. "flight_reservation_api/src/flights/model"
+	"flight_reservation_api/flights/dtos"
+	. "flight_reservation_api/flights/model"
 	"fmt"
 	"log"
 	"os"
