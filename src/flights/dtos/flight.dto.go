@@ -14,6 +14,7 @@ type FlightDto struct {
 	Departure   string             `json:"departure"`
 	Destination string             `json:"destination"`
 	Price       float64            `json:"price"`
+	FreeSeats   int                `json:"freeSeats"`
 }
 
 func NewFlightDto(flight model.Flight) *FlightDto {
@@ -24,5 +25,6 @@ func NewFlightDto(flight model.Flight) *FlightDto {
 		Departure:   flight.Departure,
 		Destination: flight.Destination,
 		Price:       flight.Price,
+		FreeSeats:   flight.FreeSeats,
 	}
 }
