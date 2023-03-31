@@ -16,7 +16,6 @@ import (
 )
 
 func main() {
-	LoadEnvs()
 	db, err := InitDB()
 	DeclareUnique(db, []UniqueField{
 		{Collection: "users", Fields: []string{"email"}},
