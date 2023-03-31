@@ -16,7 +16,6 @@ import (
 )
 
 func main() {
-	LoadEnvs()
 	db, err := InitDB()
 	DeclareUnique(db, []UniqueField{
 		{Collection: "users", Fields: []string{"email"}},
@@ -45,7 +44,7 @@ func startServer(router *mux.Router) {
 	originsOk := handlers.AllowedOrigins([]string{"http://localhost:3000"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT"})
 	server := http.Server{
-		Addr:         ":8000",
+		Addr:         ":" + os.Getenv("PORT"),
 		Handler:      handlers.CORS(originsOk, headersOk, methodsOk)(router),
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  100 * time.Second,
