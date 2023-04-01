@@ -9,4 +9,5 @@ import (
 type ITicketRepository interface {
 	CreateMany(tickets []model.Ticket) ([]primitive.ObjectID, error)
 	FindAllByBuyer(buyerId primitive.ObjectID) ([]model.FlightTicket, error)
+	DeleteByFlight(flightId primitive.ObjectID) error
 }

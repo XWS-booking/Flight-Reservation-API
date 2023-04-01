@@ -48,6 +48,11 @@ func (flightService *FlightService) Delete(id primitive.ObjectID) *shared.Error 
 	if error != nil {
 		return shared.FlightNotDeleted()
 	}
+	error = flightService.TicketRepository.DeleteByFlight(id)
+	if error != nil {
+		return shared.FlightNotDeleted()
+	}
+
 	return nil
 }
 

@@ -1,6 +1,8 @@
 package flights
 
 import (
+	"flight_reservation_api/src/auth/middlewares"
+	"flight_reservation_api/src/auth/model"
 	"flight_reservation_api/src/flights/dtos"
 	. "flight_reservation_api/src/flights/model"
 	. "flight_reservation_api/src/shared"
@@ -8,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 )
 
@@ -23,15 +26,30 @@ type FlightController struct {
 
 func (flightController *FlightController) constructor(router *mux.Router) {
 	flightRouter := router.PathPrefix("/flights").Subrouter()
-	flightRouter.HandleFunc("/add", flightController.Create).Methods("POST")
+
+	protectedRoute(flightRouter, "/add", "POST", []model.UserRole{model.ADMINISTRATOR}, flightController.Create)
+	protectedRoute(flightRouter, "/{id}", "DELETE", []model.UserRole{model.ADMINISTRATOR}, flightController.Delete)
+	protectedRoute(flightRouter, "/{id}/buy-tickets/{quantity}", "POST", []model.UserRole{model.REGULAR}, flightController.BuyTickets)
+	protectedRoute(flightRouter, "/tickets/listing", "GET", []model.UserRole{model.REGULAR}, flightController.ListTickets)
+
+	// flightRouter.HandleFunc("/add", flightController.Create).Methods("POST")
 	flightRouter.HandleFunc("/getAll/{pageNumber}/{pageSize}", flightController.GetAll).Methods("POST")
 	flightRouter.HandleFunc("/{id}", flightController.FindById).Methods("GET")
-	flightRouter.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
-	flightRouter.HandleFunc("/{id}/buy-tickets/{quantity}", flightController.BuyTickets).Methods("POST")
-	flightRouter.HandleFunc("/tickets/listing", flightController.ListTickets).Methods("GET")
+	// flightRouter.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
+	// flightRouter.HandleFunc("/{id}/buy-tickets/{quantity}", flightController.BuyTickets).Methods("POST")
+	// flightRouter.HandleFunc("/tickets/listing", flightController.ListTickets).Methods("GET")
+}
+
+func protectedRoute(router *mux.Router, route string, method string, roles []model.UserRole, f func(http.ResponseWriter, *http.Request)) {
+	newRouter := router.PathPrefix("/").Subrouter()
+	newRouter.Use(middlewares.TokenValidationMiddleware)
+	newRouter.Use(middlewares.RolesMiddleware(roles))
+	newRouter.Use(middlewares.UserMiddleware)
+	newRouter.HandleFunc(route, f).Methods(method)
 }
 
 func (flightController *FlightController) Create(resp http.ResponseWriter, req *http.Request) {
+	fmt.Println("hit")
 	var flight Flight
 	err := DecodeBody(req, &flight)
 	fmt.Println(err)
@@ -87,7 +105,8 @@ func (flightController *FlightController) Delete(resp http.ResponseWriter, req *
 }
 
 func (flightController *FlightController) ListTickets(resp http.ResponseWriter, req *http.Request) {
-	buyerId := StringToObjectId("6418a6c8e509fcd8c71a4f79")
+	id := context.Get(req, "id").(string)
+	buyerId := StringToObjectId(id)
 
 	tickets, err := flightController.FlightService.FindTicketsByBuyer(buyerId)
 	if err != nil {
@@ -99,10 +118,10 @@ func (flightController *FlightController) ListTickets(resp http.ResponseWriter, 
 }
 
 func (flightController *FlightController) BuyTickets(resp http.ResponseWriter, req *http.Request) {
-	fmt.Println("hit")
 	flightId := GetPathParam(req, "id")
 	quantity := GetPathParam(req, "quantity")
-	buyerId := StringToObjectId("6418a6c8e509fcd8c71a4f79")
+	id := context.Get(req, "id").(string)
+	buyerId := StringToObjectId(id)
 
 	quantityNum, err := strconv.Atoi(quantity)
 	if err != nil {
