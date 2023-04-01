@@ -34,6 +34,13 @@ func (ticketRepository *TicketRepository) CreateMany(tickets []model.Ticket) ([]
 
 }
 
+func (ticketRepository *TicketRepository) DeleteByFlight(flightId primitive.ObjectID) error {
+	collection := ticketRepository.getCollection("tickets")
+	filter := bson.M{"flightId": flightId}
+	_, err := collection.DeleteMany(context.TODO(), filter)
+	return err
+}
+
 func (ticketRepository *TicketRepository) FindAllByBuyer(buyerId primitive.ObjectID) ([]model.FlightTicket, error) {
 	collection := ticketRepository.getCollection("tickets")
 	matchStage := bson.D{{"$match", bson.D{{"buyer", buyerId}}}}
@@ -57,12 +64,12 @@ func (ticketRepository *TicketRepository) FindAllByBuyer(buyerId primitive.Objec
 
 	ctx := context.TODO()
 	cursor, err := collection.Aggregate(ctx, mongo.Pipeline{matchStage, lookupStage, projectStage}, options.Aggregate().SetMaxTime(10*time.Second))
-	fmt.Println(cursor)
 	if err != nil {
 		return nil, err
 	}
 
 	flightTickets, err := loadFlightTickets(cursor, ctx)
+	fmt.Println(flightTickets)
 	if err != nil {
 		return nil, err
 	}
@@ -87,8 +94,6 @@ func loadFlightTickets(cursor *mongo.Cursor, ctx context.Context) ([]model.Fligh
 	for cursor.Next(ctx) {
 		var result model.FlightTicket
 		err := cursor.Decode(&result)
-
-		fmt.Println(err, result)
 		if err != nil {
 			return nil, err
 		}
