@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  flight-service:
+    image: flight-service:compose_build
+    build:
+      context: ./flight-service
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    environment:
+      PORT: 8000
+      DATABASE_NAME: XWS
+      JWT_SECRET: secret
+      DATABASE_CONNECTION_STRING: mongodb+srv://xws:lozinka123@cluster0.yqfgbck.mongodb.net/?retryWrites=true&w=majority
