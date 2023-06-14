@@ -8,6 +8,18 @@ func InvalidCredentials() *Error {
 	return &Error{Message: "Invalid credentials!"}
 }
 
+func InvalidApiKey() *Error {
+	return &Error{Message: "Invalid api key!"}
+}
+
+func ApiKeyExpired() *Error {
+	return &Error{Message: "Api key expired!"}
+}
+
+func ApiKeyGenerationFailed() *Error {
+	return &Error{Message: "Couldn't generate your api key!"}
+}
+
 func TokenGenerationFailed() *Error {
 	return &Error{Message: "Token generation failed!"}
 }

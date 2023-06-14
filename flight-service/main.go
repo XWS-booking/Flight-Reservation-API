@@ -35,13 +35,13 @@ func main() {
 	flightRepository := &FlightRepository{DB: db, Logger: logger}
 	ticketRepository := &tickets.TicketRepository{DB: db}
 	flightService := &FlightService{FlightRepository: flightRepository, TicketRepository: ticketRepository}
-	CreateFlightController(router, flightService)
+	CreateFlightController(router, flightService, authService)
 
 	startServer(router)
 }
 
 func startServer(router *mux.Router) {
-	headersOk := handlers.AllowedHeaders([]string{"Content-Type", "Authorization"})
+	headersOk := handlers.AllowedHeaders([]string{"Content-Type", "Authorization", "Api-Key"})
 	originsOk := handlers.AllowedOrigins([]string{"http://localhost:3000"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT"})
 	server := http.Server{
