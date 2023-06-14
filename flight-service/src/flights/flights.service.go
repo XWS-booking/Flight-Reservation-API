@@ -6,6 +6,7 @@ import (
 	"flight_reservation_api/src/flights/repositories/flight"
 	"flight_reservation_api/src/flights/repositories/tickets"
 	"flight_reservation_api/src/shared"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -29,6 +30,13 @@ func (flightService *FlightService) GetAll(page dtos.PageDto, flight Flight) ([]
 		return flights, totalCount, shared.FlightsReadFailed()
 	}
 	return flights, totalCount, nil
+}
+func (flightService *FlightService) GetFlightsForReservation(startDate time.Time, endDate time.Time, departure string, destination string) ([]Flight, *shared.Error) {
+	flights, err := flightService.FlightRepository.GetFlightsForReservation(startDate, endDate, departure, destination)
+	if err != nil {
+		return flights, shared.FlightsReadFailed()
+	}
+	return flights, nil
 }
 
 func (flightService *FlightService) FindById(id primitive.ObjectID) (Flight, *shared.Error) {

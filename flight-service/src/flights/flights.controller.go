@@ -7,11 +7,12 @@ import (
 	. "flight_reservation_api/src/flights/model"
 	. "flight_reservation_api/src/shared"
 	"fmt"
-	"net/http"
-	"strconv"
-
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func CreateFlightController(router *mux.Router, flightService *FlightService) *FlightController {
@@ -34,6 +35,7 @@ func (flightController *FlightController) constructor(router *mux.Router) {
 
 	// flightRouter.HandleFunc("/add", flightController.Create).Methods("POST")
 	flightRouter.HandleFunc("/getAll/{pageNumber}/{pageSize}", flightController.GetAll).Methods("POST")
+	flightRouter.HandleFunc("/reservation", flightController.GetFlightsForReservation).Methods("GET")
 	flightRouter.HandleFunc("/{id}", flightController.FindById).Methods("GET")
 	// flightRouter.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
 	// flightRouter.HandleFunc("/{id}/buy-tickets/{quantity}", flightController.BuyTickets).Methods("POST")
@@ -84,6 +86,24 @@ func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *
 	}
 
 	Ok(&resp, dtos.NewFlightPageDto(flights, totalCount))
+}
+
+func (flightController *FlightController) GetFlightsForReservation(resp http.ResponseWriter, req *http.Request) {
+	layout := "2006-01-02T15:04:05.000 -07:00"
+	startDate, err := time.Parse(layout, strings.ReplaceAll(req.URL.Query().Get("startDate"), " 00:00", " +00:00"))
+	if err != nil {
+		fmt.Println(err)
+	}
+	endDate, _ := time.Parse(layout, strings.ReplaceAll(req.URL.Query().Get("endDate"), " 00:00", " +00:00"))
+	departure := req.URL.Query().Get("departure")
+	destination := req.URL.Query().Get("destination")
+	fmt.Println(req.URL.Query().Get("startDate"), endDate, departure, destination)
+
+	flights, e := flightController.FlightService.GetFlightsForReservation(startDate, endDate, departure, destination)
+	if e != nil {
+		BadRequest(resp, e.Message)
+	}
+	Ok(&resp, flights)
 }
 
 func (flightController *FlightController) FindById(resp http.ResponseWriter, req *http.Request) {
