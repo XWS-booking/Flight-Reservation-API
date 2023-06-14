@@ -13,5 +13,5 @@ type IFlightRepository interface {
 	Delete(id primitive.ObjectID) error
 	FindAll(page dtos.PageDto, flight Flight) ([]Flight, int, error)
 	Update(flight *Flight) error
-	GetFlightsForReservation(startDate time.Time, endDate time.Time, departure string, destination string) ([]Flight, error)
+	GetFlightsForReservation(date time.Time, departure string, destination string) ([]Flight, error)
 }

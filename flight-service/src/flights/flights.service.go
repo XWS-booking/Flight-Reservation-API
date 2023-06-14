@@ -31,8 +31,8 @@ func (flightService *FlightService) GetAll(page dtos.PageDto, flight Flight) ([]
 	}
 	return flights, totalCount, nil
 }
-func (flightService *FlightService) GetFlightsForReservation(startDate time.Time, endDate time.Time, departure string, destination string) ([]Flight, *shared.Error) {
-	flights, err := flightService.FlightRepository.GetFlightsForReservation(startDate, endDate, departure, destination)
+func (flightService *FlightService) GetFlightsForReservation(date time.Time, departure string, destination string) ([]Flight, *shared.Error) {
+	flights, err := flightService.FlightRepository.GetFlightsForReservation(date, departure, destination)
 	if err != nil {
 		return flights, shared.FlightsReadFailed()
 	}
