@@ -11,7 +11,6 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -89,14 +88,14 @@ func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *
 }
 
 func (flightController *FlightController) GetFlightsForReservation(resp http.ResponseWriter, req *http.Request) {
-	layout := "2006-01-02T15:04:05.000 -07:00"
-	date, err := time.Parse(layout, strings.ReplaceAll(req.URL.Query().Get("date"), " 00:00", " +00:00"))
+	layout := "2006-01-02T15:04:05Z"
+	date, err := time.Parse(layout, req.URL.Query().Get("date"))
 	if err != nil {
 		fmt.Println(err)
 	}
 	departure := req.URL.Query().Get("departure")
 	destination := req.URL.Query().Get("destination")
-
+	fmt.Println(departure, destination, date)
 	flights, e := flightController.FlightService.GetFlightsForReservation(date, departure, destination)
 	if e != nil {
 		BadRequest(resp, e.Message)

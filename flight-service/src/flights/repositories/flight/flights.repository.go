@@ -65,10 +65,17 @@ func (flightRepository *FlightRepository) FindAll(page dtos.PageDto, flight Flig
 func (flightRepository *FlightRepository) GetFlightsForReservation(date time.Time, departure string, destination string) ([]Flight, error) {
 	collection := flightRepository.getCollection("flights")
 	flights := make([]Flight, 0)
+
 	filter := bson.M{
 		"destination": destination,
 		"departure":   departure,
-		"date":        date,
+		"date": bson.M{
+			"$gte": date,
+			"$lt":  date.AddDate(0, 0, 1),
+		},
+		"freeSeats": bson.M{
+			"$gt": 0,
+		},
 	}
 	cur, err := collection.Find(context.TODO(), filter)
 	if err != nil {
