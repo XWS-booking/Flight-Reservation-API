@@ -1,6 +1,7 @@
 package flights
 
 import (
+	"flight_reservation_api/src/auth"
 	"flight_reservation_api/src/auth/middlewares"
 	"flight_reservation_api/src/auth/model"
 	"flight_reservation_api/src/flights/dtos"
@@ -14,34 +15,32 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func CreateFlightController(router *mux.Router, flightService *FlightService) *FlightController {
-	controller := &FlightController{FlightService: flightService}
+func CreateFlightController(router *mux.Router, flightService *FlightService, authService *auth.AuthService) *FlightController {
+	controller := &FlightController{FlightService: flightService, AuthService: authService}
 	controller.constructor(router)
 	return controller
 }
 
 type FlightController struct {
 	FlightService *FlightService
+	AuthService   *auth.AuthService
 }
 
 func (flightController *FlightController) constructor(router *mux.Router) {
 	flightRouter := router.PathPrefix("/flights").Subrouter()
 
-	protectedRoute(flightRouter, "/add", "POST", []model.UserRole{model.ADMINISTRATOR}, flightController.Create)
-	protectedRoute(flightRouter, "/{id}", "DELETE", []model.UserRole{model.ADMINISTRATOR}, flightController.Delete)
-	protectedRoute(flightRouter, "/{id}/buy-tickets/{quantity}", "POST", []model.UserRole{model.REGULAR}, flightController.BuyTickets)
-	protectedRoute(flightRouter, "/tickets/listing", "GET", []model.UserRole{model.REGULAR}, flightController.ListTickets)
+	protectedRoute(flightRouter, "/add", "POST", flightController.AuthService, []model.UserRole{model.ADMINISTRATOR}, flightController.Create)
+	protectedRoute(flightRouter, "/{id}", "DELETE", flightController.AuthService, []model.UserRole{model.ADMINISTRATOR}, flightController.Delete)
+	protectedRoute(flightRouter, "/{id}/buy-tickets/{quantity}", "POST", flightController.AuthService, []model.UserRole{model.REGULAR}, flightController.BuyTickets)
+	protectedRoute(flightRouter, "/tickets/listing", "GET", flightController.AuthService, []model.UserRole{model.REGULAR}, flightController.ListTickets)
 
-	// flightRouter.HandleFunc("/add", flightController.Create).Methods("POST")
 	flightRouter.HandleFunc("/getAll/{pageNumber}/{pageSize}", flightController.GetAll).Methods("POST")
 	flightRouter.HandleFunc("/{id}", flightController.FindById).Methods("GET")
-	// flightRouter.HandleFunc("/{id}", flightController.Delete).Methods("DELETE")
-	// flightRouter.HandleFunc("/{id}/buy-tickets/{quantity}", flightController.BuyTickets).Methods("POST")
-	// flightRouter.HandleFunc("/tickets/listing", flightController.ListTickets).Methods("GET")
 }
 
-func protectedRoute(router *mux.Router, route string, method string, roles []model.UserRole, f func(http.ResponseWriter, *http.Request)) {
+func protectedRoute(router *mux.Router, route string, method string, authService *auth.AuthService, roles []model.UserRole, f func(http.ResponseWriter, *http.Request)) {
 	newRouter := router.PathPrefix("/").Subrouter()
+	newRouter.Use(middlewares.ApiKeyMiddleware(authService))
 	newRouter.Use(middlewares.TokenValidationMiddleware)
 	newRouter.Use(middlewares.RolesMiddleware(roles))
 	newRouter.Use(middlewares.UserMiddleware)

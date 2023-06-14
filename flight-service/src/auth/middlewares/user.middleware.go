@@ -11,14 +11,17 @@ import (
 
 func UserMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		var token *jwt.Token = context.Get(r, "Token").(*jwt.Token)
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok || !token.Valid {
-			Unauthorized(rw)
-			return
+		authorizedByApiKey, ok := context.Get(r, "api-key-authorization").(bool)
+		if !authorizedByApiKey || !ok {
+			var token *jwt.Token = context.Get(r, "Token").(*jwt.Token)
+			claims, ok := token.Claims.(jwt.MapClaims)
+			if !ok || !token.Valid {
+				Unauthorized(rw)
+				return
+			}
+			id := claims["id"].(string)
+			context.Set(r, "id", id)
 		}
-		id := claims["id"].(string)
-		context.Set(r, "id", id)
 		next.ServeHTTP(rw, r)
 	})
 }

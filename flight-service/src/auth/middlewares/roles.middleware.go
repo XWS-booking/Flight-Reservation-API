@@ -12,14 +12,24 @@ import (
 func RolesMiddleware(roles []model.UserRole) func(h http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		fn := func(rw http.ResponseWriter, r *http.Request) {
-			var token *jwt.Token = context.Get(r, "Token").(*jwt.Token)
-			claims, ok := token.Claims.(jwt.MapClaims)
-			if !ok || !token.Valid {
-				Unauthorized(rw)
+			authorizedByApiKey, ok := context.Get(r, "api-key-authorization").(bool)
+			if !authorizedByApiKey || !ok {
+				var token *jwt.Token = context.Get(r, "Token").(*jwt.Token)
+				claims, ok := token.Claims.(jwt.MapClaims)
+				if !ok || !token.Valid {
+					Unauthorized(rw)
+					return
+				}
+				role := claims["role"].(float64)
+				if !containsRole(roles, int(role)) {
+					Forbidden(rw)
+					return
+				}
+				h.ServeHTTP(rw, r)
 				return
 			}
-			role := claims["role"].(float64)
-			if !containsRole(roles, int(role)) {
+			userRole, _ := context.Get(r, "role").(model.UserRole)
+			if !containsRole(roles, int(userRole)) {
 				Forbidden(rw)
 				return
 			}
