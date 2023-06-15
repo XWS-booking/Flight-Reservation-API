@@ -51,6 +51,30 @@ func (userRepository *UserRepository) FindByEmail(email string) (User, error) {
 	return user, nil
 }
 
+func (userRepository *UserRepository) FindByApiKey(apiKey string) (User, error) {
+	collection := userRepository.getCollection("users")
+	var user User
+	filter := bson.M{"api_key": apiKey}
+	err := collection.FindOne(context.TODO(), filter).Decode(&user)
+	if err != nil {
+		userRepository.Logger.Println(err)
+		return user, err
+	}
+	return user, nil
+}
+
+func (userRepository *UserRepository) Update(user User) (User, error) {
+	collection := userRepository.getCollection("users")
+	filter := bson.M{"_id": user.Id}
+	update := bson.M{"$set": user}
+	_, err := collection.UpdateOne(context.TODO(), filter, update)
+	if err != nil {
+		userRepository.Logger.Println(err)
+		return user, err
+	}
+	return user, nil
+}
+
 func (userRepository *UserRepository) getCollection(key string) *mongo.Collection {
 	return userRepository.DB.Database(os.Getenv("DATABASE_NAME")).Collection(key)
 }

@@ -7,6 +7,7 @@ import (
 	. "flight_reservation_api/src/shared"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
@@ -25,10 +26,11 @@ type AuthController struct {
 func (authController *AuthController) constructor(router *mux.Router) {
 	authRouter := router.PathPrefix("/auth").Subrouter()
 	authRouter.HandleFunc("/signin", authController.Signin).Methods("POST")
-	getUserRouter := authRouter.PathPrefix("").Subrouter()
-	getUserRouter.Use(middlewares.TokenValidationMiddleware)
-	getUserRouter.Use(middlewares.UserMiddleware)
-	getUserRouter.HandleFunc("/user", authController.GetCurrentUser).Methods("GET")
+	loggedUserRouter := authRouter.PathPrefix("").Subrouter()
+	loggedUserRouter.Use(middlewares.TokenValidationMiddleware)
+	loggedUserRouter.Use(middlewares.UserMiddleware)
+	loggedUserRouter.HandleFunc("/user", authController.GetCurrentUser).Methods("GET")
+	loggedUserRouter.HandleFunc("/user/api-key/{permanent}", authController.GenerateApiKey).Methods("POST")
 	authRouter.HandleFunc("/register", authController.Register).Methods("POST")
 }
 
@@ -47,6 +49,23 @@ func (authController *AuthController) Signin(resp http.ResponseWriter, req *http
 	}
 
 	Ok(&resp, dtos.NewJwtDto(token))
+}
+
+func (authController *AuthController) GenerateApiKey(resp http.ResponseWriter, req *http.Request) {
+	userid := context.Get(req, "id").(string)
+	permanent, err := strconv.ParseBool(GetPathParam(req, "permanent"))
+	if err != nil {
+		BadRequest(resp, "Problem with data!")
+		return
+	}
+	fmt.Println(permanent)
+	apiKey, e := authController.AuthService.GenerateApiKey(userid, permanent)
+	if e != nil {
+		BadRequest(resp, e.Message)
+		return
+	}
+
+	Ok(&resp, apiKey)
 }
 
 func (authController *AuthController) GetCurrentUser(resp http.ResponseWriter, req *http.Request) {

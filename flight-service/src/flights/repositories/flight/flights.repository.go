@@ -66,16 +66,11 @@ func (flightRepository *FlightRepository) GetFlightsForReservation(date time.Tim
 	collection := flightRepository.getCollection("flights")
 	flights := make([]Flight, 0)
 
-	filter := bson.M{
-		"destination": destination,
-		"departure":   departure,
-		"date": bson.M{
-			"$gte": date,
-			"$lt":  date.AddDate(0, 0, 1),
-		},
-		"freeSeats": bson.M{
-			"$gt": 0,
-		},
+	filter := bson.D{
+		{Key: "destination", Value: bson.D{{Key: "$regex", Value: "(?i).*" + destination + ".*"}}},
+		{Key: "departure", Value: bson.D{{Key: "$regex", Value: "(?i).*" + departure + ".*"}}},
+		{Key: "date", Value: bson.D{{Key: "$gte", Value: date}, {Key: "$lt", Value: date.AddDate(0, 0, 1)}}},
+		{Key: "freeSeats", Value: bson.D{{Key: "$gt", Value: 0}}},
 	}
 	cur, err := collection.Find(context.TODO(), filter)
 	if err != nil {

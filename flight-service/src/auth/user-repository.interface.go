@@ -9,5 +9,7 @@ import (
 type IUserRepository interface {
 	Create(user User) (primitive.ObjectID, error)
 	FindById(id primitive.ObjectID) (User, error)
+	FindByApiKey(apiKey string) (User, error)
 	FindByEmail(email string) (User, error)
+	Update(user User) (User, error)
 }
