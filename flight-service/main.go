@@ -42,7 +42,8 @@ func main() {
 
 func startServer(router *mux.Router) {
 	headersOk := handlers.AllowedHeaders([]string{"Content-Type", "Authorization", "Api-Key"})
-	originsOk := handlers.AllowedOrigins([]string{"http://localhost:3000"})
+	originsOk := handlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:3001"})
+
 	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT"})
 	server := http.Server{
 		Addr:         ":" + os.Getenv("PORT"),

@@ -8,11 +8,11 @@ import (
 	. "flight_reservation_api/src/flights/model"
 	. "flight_reservation_api/src/shared"
 	"fmt"
-	"net/http"
-	"strconv"
-
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	"net/http"
+	"strconv"
+	"time"
 )
 
 func CreateFlightController(router *mux.Router, flightService *FlightService, authService *auth.AuthService) *FlightController {
@@ -35,6 +35,7 @@ func (flightController *FlightController) constructor(router *mux.Router) {
 	protectedRoute(flightRouter, "/tickets/listing", "GET", flightController.AuthService, []model.UserRole{model.REGULAR}, flightController.ListTickets)
 
 	flightRouter.HandleFunc("/getAll/{pageNumber}/{pageSize}", flightController.GetAll).Methods("POST")
+	flightRouter.HandleFunc("/reservation", flightController.GetFlightsForReservation).Methods("GET")
 	flightRouter.HandleFunc("/{id}", flightController.FindById).Methods("GET")
 }
 
@@ -83,6 +84,21 @@ func (flightController *FlightController) GetAll(resp http.ResponseWriter, req *
 	}
 
 	Ok(&resp, dtos.NewFlightPageDto(flights, totalCount))
+}
+
+func (flightController *FlightController) GetFlightsForReservation(resp http.ResponseWriter, req *http.Request) {
+	layout := "2006-01-02T15:04:05Z"
+	date, err := time.Parse(layout, req.URL.Query().Get("date"))
+	if err != nil {
+		fmt.Println(err)
+	}
+	departure := req.URL.Query().Get("departure")
+	destination := req.URL.Query().Get("destination")
+	flights, e := flightController.FlightService.GetFlightsForReservation(date, departure, destination)
+	if e != nil {
+		BadRequest(resp, e.Message)
+	}
+	Ok(&resp, flights)
 }
 
 func (flightController *FlightController) FindById(resp http.ResponseWriter, req *http.Request) {

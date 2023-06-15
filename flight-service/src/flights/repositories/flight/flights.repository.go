@@ -5,14 +5,13 @@ import (
 	"flight_reservation_api/src/flights/dtos"
 	. "flight_reservation_api/src/flights/model"
 	"fmt"
-	"log"
-	"os"
-	"time"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"os"
+	"time"
 )
 
 type FlightRepository struct {
@@ -61,6 +60,32 @@ func (flightRepository *FlightRepository) FindAll(page dtos.PageDto, flight Flig
 		flights = append(flights, elem)
 	}
 	return flights, totalCount, nil
+}
+
+func (flightRepository *FlightRepository) GetFlightsForReservation(date time.Time, departure string, destination string) ([]Flight, error) {
+	collection := flightRepository.getCollection("flights")
+	flights := make([]Flight, 0)
+
+	filter := bson.D{
+		{Key: "destination", Value: bson.D{{Key: "$regex", Value: "(?i).*" + destination + ".*"}}},
+		{Key: "departure", Value: bson.D{{Key: "$regex", Value: "(?i).*" + departure + ".*"}}},
+		{Key: "date", Value: bson.D{{Key: "$gte", Value: date}, {Key: "$lt", Value: date.AddDate(0, 0, 1)}}},
+		{Key: "freeSeats", Value: bson.D{{Key: "$gt", Value: 0}}},
+	}
+	cur, err := collection.Find(context.TODO(), filter)
+	if err != nil {
+		return flights, err
+	}
+	for cur.Next(context.TODO()) {
+		var elem Flight
+		err := cur.Decode(&elem)
+		if err != nil {
+			return flights, err
+		}
+		flights = append(flights, elem)
+	}
+	return flights, nil
+
 }
 
 func (flightRepository *FlightRepository) getTotalCount(filter bson.D) (int, error) {
